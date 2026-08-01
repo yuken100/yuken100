@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Role/PlanInterval/SubscriptionStatus/PurchaseStatus are plain strings
+// (not native enums) so the schema stays portable; validity is enforced in
+// application code (src/lib, zod schemas).
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  passwordHash  String
+  role          String         @default("USER")
+  createdAt     DateTime       @default(now())
+  purchases     Purchase[]
+  subscriptions Subscription[]
+}
+
+model Video {
+  id              String     @id @default(cuid())
+  slug            String     @unique
+  title           String
+  description     String
+  category        String
+  level           String
+  durationMinutes Int
+  priceJpy        Int
+  gradientFrom    String     @default("#81D8D0")
+  gradientTo      String     @default("#FFD2D9")
+  videoUrl        String
+  previewUrl      String?
+  membersOnly     Boolean    @default(false)
+  published       Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+  purchases       Purchase[]
+}
+
+model Plan {
+  id            String         @id @default(cuid())
+  key           String         @unique
+  name          String
+  priceJpy      Int
+  interval      String
+  description   String
+  features      String
+  subscriptions Subscription[]
+}
+
+model Purchase {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  videoId     String
+  video       Video    @relation(fields: [videoId], references: [id])
+  amountJpy   Int
+  provider    String
+  providerRef String?
+  status      String   @default("PAID")
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, videoId])
+}
+
+model Subscription {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  planId           String
+  plan             Plan      @relation(fields: [planId], references: [id])
+  status           String    @default("ACTIVE")
+  provider         String
+  providerRef      String?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime  @default(now())
+}
