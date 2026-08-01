@@ -6,7 +6,7 @@
 
 - Next.js 14 (App Router) + TypeScript
 - Tailwind CSS(ティファニーブルー基調のデザインシステム)
-- Prisma + SQLite(開発用。本番では Postgres 等に切り替え可能)
+- Prisma + PostgreSQL
 - NextAuth.js(メール/パスワード認証)
 - Stripe(カード決済・サブスクリプション)
 - PayPal REST API(単品購入)
@@ -20,11 +20,13 @@
 - 購入/会員権限に応じた動画視聴ページのアクセス制御
 - 管理画面(`/admin`)で動画の追加・編集・削除、売上・会員数の確認
 
-## セットアップ
+## セットアップ(ローカル開発)
+
+PostgreSQLが必要です。[Neon](https://neon.tech)や[Supabase](https://supabase.com)の無料枠で数分で用意できます。
 
 ```bash
 npm install
-cp .env.example .env   # 値を編集(下記参照)
+cp .env.example .env   # DATABASE_URLを用意したPostgresの接続文字列に置き換える
 npx prisma db push
 npx prisma db seed
 npm run dev
@@ -43,7 +45,7 @@ http://localhost:3000 で起動します。
 
 | 変数 | 説明 |
 | --- | --- |
-| `DATABASE_URL` | Prisma接続文字列。開発は SQLite(`file:./dev.db`) |
+| `DATABASE_URL` | PostgreSQLの接続文字列 |
 | `NEXTAUTH_SECRET` | NextAuth用のランダム文字列(`openssl rand -base64 32`等で生成) |
 | `NEXTAUTH_URL` | サイトのURL |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripeダッシュボードで取得 |
@@ -66,6 +68,23 @@ http://localhost:3000 で起動します。
 2. `.env` に `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` を設定(検証中は `PAYPAL_ENV=sandbox`)
 3. 現状PayPalは単品購入のみ対応(会員プランのサブスクリプションはStripeのみ)
 
+## Vercelへのデプロイ手順
+
+1. [vercel.com/new](https://vercel.com/new) からGitHubリポジトリ `yuken100/yuken100` をImport
+2. **Root Directory** を `video-sales-site` に設定(リポジトリ直下ではなくサブフォルダにアプリがあるため)
+3. プロジェクトの **Storage** タブから Postgres(Neon)を作成し、プロジェクトに接続する
+   → `DATABASE_URL` が自動的に環境変数として設定されます
+4. 残りの環境変数を設定(Project Settings → Environment Variables)
+   - `NEXTAUTH_SECRET`(ランダム文字列。`openssl rand -base64 32`で生成)
+   - `NEXTAUTH_URL` / `NEXT_PUBLIC_SITE_URL`(デプロイ後に発行されるURL、例: `https://xxxx.vercel.app`)
+   - Stripe / PayPal のキー(後から追加でも可)
+5. Deploy
+6. 初回デプロイ後、Vercelのプロジェクト設定からTerminal機能か、ローカルから本番の`DATABASE_URL`を指定して以下を一度だけ実行し、テーブル作成とシードデータ投入を行う
+   ```bash
+   DATABASE_URL="<本番のDATABASE_URL>" npx prisma db push
+   DATABASE_URL="<本番のDATABASE_URL>" npx prisma db seed
+   ```
+
 ## 動画の追加方法
 
 管理者アカウントでログイン後、`/admin` → 「新しい動画を追加」から追加できます。
@@ -74,7 +93,6 @@ http://localhost:3000 で起動します。
 
 ## 本番運用に向けて
 
-- データベースをSQLiteからPostgres等に切り替え、`DATABASE_URL` を変更
 - Next.jsを最新の安定バージョンへアップグレード(既知の脆弱性対応。App Router APIの破壊的変更に注意)
 - 動画ファイルの配信をCDN/専用の動画ホスティング(Vimeo, Mux, Cloudflare Streamなど)に移行
 - メール認証やパスワードリセットなど、認証まわりの拡張

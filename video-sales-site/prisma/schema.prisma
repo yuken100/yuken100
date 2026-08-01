@@ -3,12 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// SQLite has no native enum support, so Role/PlanInterval/SubscriptionStatus/
-// PurchaseStatus are plain strings constrained in application code (src/lib, zod schemas).
+// Role/PlanInterval/SubscriptionStatus/PurchaseStatus are plain strings
+// (not native enums) so the schema stays portable; validity is enforced in
+// application code (src/lib, zod schemas).
 
 model User {
   id            String         @id @default(cuid())
