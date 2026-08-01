@@ -59,7 +59,7 @@ export async function POST(request: Request) {
         application_context: {
           return_url: `${siteUrl}/api/checkout/paypal/capture`,
           cancel_url: `${siteUrl}/courses/${video.slug}?checkout=cancel`,
-          brand_name: "Yui Yoga Studio",
+          brand_name: "Sara Yoga",
           user_action: "PAY_NOW",
         },
       }),

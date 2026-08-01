@@ -3,7 +3,7 @@ export default function AboutPage() {
     <div className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="font-display text-3xl font-bold text-tiffany-900">スタジオについて</h1>
       <p className="mt-6 text-sm leading-relaxed text-tiffany-800/80">
-        Yui Yoga Studioは、ヨガインストラクターとして活動する方・これから目指す方に向けた
+        Sara Yogaは、ヨガインストラクターとして活動する方・これから目指す方に向けた
         オンライン動画講座プラットフォームです。解剖学の基礎から、現場で使える指導スキル、
         マタニティヨガやキッズヨガといった専門コースまで、実践的な内容を毎週追加しています。
       </p>

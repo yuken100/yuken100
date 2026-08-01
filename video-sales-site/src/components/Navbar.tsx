@@ -15,7 +15,7 @@ export default function Navbar() {
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-tiffany-300 text-white">
             楽
           </span>
-          Yui Yoga Studio
+          Sara Yoga
         </Link>
         <div className="hidden items-center gap-8 md:flex">
           {links.map((link) => (

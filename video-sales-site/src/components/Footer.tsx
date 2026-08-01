@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-10 text-sm text-tiffany-800/70">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="font-display text-lg font-bold text-tiffany-700">Yui Yoga Studio</p>
+            <p className="font-display text-lg font-bold text-tiffany-700">Sara Yoga</p>
             <p className="mt-2 max-w-sm">
               ヨガインストラクターのための学びのプラットフォーム。解剖学から指導スキル、
               専門コースまで、現場で使える講座を毎週お届けしています。
@@ -32,7 +32,7 @@ export default function Footer() {
           </div>
         </div>
         <p className="mt-8 text-xs text-tiffany-800/50">
-          &copy; {new Date().getFullYear()} Yui Yoga Studio. All rights reserved.
+          &copy; {new Date().getFullYear()} Sara Yoga. All rights reserved.
         </p>
       </div>
     </footer>
