@@ -1,0 +1,40 @@
+import Link from "next/link";
+
+export default function Footer() {
+  return (
+    <footer className="border-t border-tiffany-100 bg-white">
+      <div className="mx-auto max-w-6xl px-6 py-10 text-sm text-tiffany-800/70">
+        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="font-display text-lg font-bold text-tiffany-700">Yui Yoga Studio</p>
+            <p className="mt-2 max-w-sm">
+              ヨガインストラクターのための学びのプラットフォーム。解剖学から指導スキル、
+              専門コースまで、現場で使える講座を毎週お届けしています。
+            </p>
+          </div>
+          <div className="flex gap-10">
+            <div>
+              <p className="font-semibold text-tiffany-800">サイトマップ</p>
+              <ul className="mt-2 space-y-1">
+                <li><Link href="/courses" className="hover:text-tiffany-700">講座一覧</Link></li>
+                <li><Link href="/pricing" className="hover:text-tiffany-700">料金プラン</Link></li>
+                <li><Link href="/about" className="hover:text-tiffany-700">スタジオについて</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold text-tiffany-800">アカウント</p>
+              <ul className="mt-2 space-y-1">
+                <li><Link href="/login" className="hover:text-tiffany-700">ログイン</Link></li>
+                <li><Link href="/signup" className="hover:text-tiffany-700">新規登録</Link></li>
+                <li><Link href="/dashboard" className="hover:text-tiffany-700">マイページ</Link></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p className="mt-8 text-xs text-tiffany-800/50">
+          &copy; {new Date().getFullYear()} Yui Yoga Studio. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  );
+}
