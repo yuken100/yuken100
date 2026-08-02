@@ -11,9 +11,17 @@ export default async function WatchPage({ params }: { params: { slug: string } }
   if (!video || !video.published) notFound();
 
   const isFree = video.priceJpy === 0 && !video.membersOnly;
+  const session = await getServerSession(authOptions);
 
-  if (!isFree) {
-    const session = await getServerSession(authOptions);
+  if (isFree) {
+    if (session) {
+      await prisma.purchase.upsert({
+        where: { userId_videoId: { userId: session.user.id, videoId: video.id } },
+        update: {},
+        create: { userId: session.user.id, videoId: video.id, amountJpy: 0, provider: "free" },
+      });
+    }
+  } else {
     if (!session) redirect(`/login?callbackUrl=/watch/${params.slug}`);
 
     const unlocked = await canWatchVideo(session.user.id, video.id);
