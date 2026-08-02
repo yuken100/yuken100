@@ -75,6 +75,12 @@ function LoginForm() {
         </button>
       </form>
 
+      <p className="mt-4 text-center text-sm">
+        <Link href="/forgot-password" className="font-semibold text-tiffany-600 hover:text-tiffany-800">
+          パスワードをお忘れですか？
+        </Link>
+      </p>
+
       <p className="mt-6 text-center text-sm text-tiffany-800/70">
         アカウントをお持ちでない方は
         <Link href="/signup" className="ml-1 font-semibold text-tiffany-600 hover:text-tiffany-800">
