@@ -146,8 +146,43 @@ ALTER TABLE "Purchase" ADD CONSTRAINT "Purchase_resellerId_fkey" FOREIGN KEY ("r
 `videoUrl` には実際の動画ファイル(mp4)のURLを指定してください
 (Vimeo/Mux/S3など、外部の動画ホスティングサービスとの組み合わせを想定しています)。
 
+## パスワードの再設定(忘れた場合)
+
+`/login` の「パスワードをお忘れですか？」から、登録済みメールアドレス宛にパスワード再設定用のリンク(有効期限1時間)を送信できます。メール送信には[Resend](https://resend.com)を使用しています。
+
+### セットアップ
+
+1. [resend.com](https://resend.com)で無料アカウントを作成
+2. ダッシュボードの「API Keys」から新しいAPIキーを発行
+3. 環境変数に以下を設定(ローカルは`.env`、本番はVercelのEnvironment Variables)
+   - `RESEND_API_KEY`: 発行したAPIキー
+   - `EMAIL_FROM`: 送信元アドレス。独自ドメインを検証していない場合は`onboarding@resend.dev`のままでOK(Resendのテスト用アドレス)
+
+独自ドメイン(例: `no-reply@sara-yoga.example.com`)から送りたい場合は、Resendの「Domains」でドメインを追加し、指示されるDNSレコードをドメインの管理画面(お名前.comなど)に追加して認証してください。
+
+### データベースのマイグレーション
+
+このプログラムのために`PasswordResetToken`テーブルを追加しています。本番のデータベース(Neon)に反映するには、SQL Editorで以下を実行してください。
+
+```sql
+CREATE TABLE "PasswordResetToken" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "usedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PasswordResetToken_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "PasswordResetToken"("token");
+
+ALTER TABLE "PasswordResetToken" ADD CONSTRAINT "PasswordResetToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+```
+
 ## 本番運用に向けて
 
 - Next.jsを最新の安定バージョンへアップグレード(既知の脆弱性対応。App Router APIの破壊的変更に注意)
 - 動画ファイルの配信をCDN/専用の動画ホスティング(Vimeo, Mux, Cloudflare Streamなど)に移行
-- メール認証やパスワードリセットなど、認証まわりの拡張
+- メール認証(サインアップ時の確認メール)などの拡張
