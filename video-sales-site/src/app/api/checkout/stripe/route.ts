@@ -4,6 +4,7 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { getReferringReseller, platformFeeJpy } from "@/lib/referral";
 
 const bodySchema = z.union([
   z.object({ type: z.literal("video"), videoId: z.string() }),
@@ -41,8 +42,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "講座が見つかりません。" }, { status: 404 });
       }
 
-      const checkoutSession = await stripe.checkout.sessions.create({
-        mode: "payment",
+      const reseller = await getReferringReseller();
+      const applicationFeeJpy = reseller ? platformFeeJpy(video.priceJpy) : undefined;
+
+      const checkoutSessionParams = {
+        mode: "payment" as const,
         customer_email: session.user.email ?? undefined,
         line_items: [
           {
@@ -54,14 +58,32 @@ export async function POST(request: Request) {
             },
           },
         ],
+        // When a reseller referred this sale, this Checkout Session is created
+        // directly on the reseller's connected account (via the stripeAccount
+        // request option below) — a Direct Charge. The reseller is the
+        // merchant of record: funds settle to them first, and Stripe carves
+        // out our application_fee_amount automatically at the same time.
+        ...(reseller && {
+          payment_intent_data: { application_fee_amount: applicationFeeJpy },
+        }),
         metadata: {
           type: "video",
           videoId: video.id,
           userId: session.user.id,
+          ...(reseller && {
+            resellerId: reseller.id,
+            applicationFeeJpy: String(applicationFeeJpy),
+          }),
         },
         success_url: `${siteUrl}/courses/${video.slug}?checkout=success`,
         cancel_url: `${siteUrl}/courses/${video.slug}?checkout=cancel`,
-      });
+      };
+
+      const checkoutSession = reseller
+        ? await stripe.checkout.sessions.create(checkoutSessionParams, {
+            stripeAccount: reseller.stripeAccountId as string,
+          })
+        : await stripe.checkout.sessions.create(checkoutSessionParams);
 
       return NextResponse.json({ url: checkoutSession.url });
     }

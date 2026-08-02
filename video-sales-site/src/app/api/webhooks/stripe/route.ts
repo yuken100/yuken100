@@ -28,6 +28,15 @@ export async function POST(request: Request) {
     if (metadata.type === "video" && metadata.videoId && metadata.userId) {
       const video = await prisma.video.findUnique({ where: { id: metadata.videoId } });
       if (video) {
+        // If this event came from a reseller's connected account (Direct
+        // Charge), event.account carries that account's ID — cross-check it
+        // against the referenced reseller before crediting the sale to them.
+        const resellerId =
+          metadata.resellerId && event.account ? metadata.resellerId : undefined;
+        const applicationFeeJpy = resellerId
+          ? Number(metadata.applicationFeeJpy) || null
+          : null;
+
         await prisma.purchase.upsert({
           where: { userId_videoId: { userId: metadata.userId, videoId: video.id } },
           update: { status: "PAID" },
@@ -38,6 +47,8 @@ export async function POST(request: Request) {
             provider: "stripe",
             providerRef: checkoutSession.id,
             status: "PAID",
+            resellerId,
+            applicationFeeJpy,
           },
         });
       }

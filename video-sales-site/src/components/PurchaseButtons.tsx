@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 export default function PurchaseButtons({
   videoId,
   membersOnly,
+  viaReseller = false,
 }: {
   videoId: string;
   membersOnly: boolean;
+  viaReseller?: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState<"stripe" | "paypal" | null>(null);
@@ -57,13 +59,15 @@ export default function PurchaseButtons({
           >
             {loading === "stripe" ? "処理中..." : "クレジットカードで購入 (Stripe)"}
           </button>
-          <button
-            onClick={() => startCheckout("paypal")}
-            disabled={loading !== null}
-            className="rounded-full border border-tiffany-300 bg-white px-6 py-3 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50 disabled:opacity-60"
-          >
-            {loading === "paypal" ? "処理中..." : "PayPalで購入"}
-          </button>
+          {!viaReseller && (
+            <button
+              onClick={() => startCheckout("paypal")}
+              disabled={loading !== null}
+              className="rounded-full border border-tiffany-300 bg-white px-6 py-3 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50 disabled:opacity-60"
+            >
+              {loading === "paypal" ? "処理中..." : "PayPalで購入"}
+            </button>
+          )}
         </>
       )}
       {membersOnly && (

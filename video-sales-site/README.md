@@ -19,6 +19,7 @@
 - マイページ(購入済み講座・会員プラン状況・解約)
 - 購入/会員権限に応じた動画視聴ページのアクセス制御
 - 管理画面(`/admin`)で動画の追加・編集・削除、売上・会員数の確認
+- 販売代理店(修了生)プログラム: Stripe Connectを使ったレベニューシェア型の再販機能(詳細は下記)
 
 ## セットアップ(ローカル開発)
 
@@ -84,6 +85,60 @@ http://localhost:3000 で起動します。
    DATABASE_URL="<本番のDATABASE_URL>" npx prisma db push
    DATABASE_URL="<本番のDATABASE_URL>" npx prisma db seed
    ```
+
+## 販売代理店(修了生)プログラム — フェーズ1
+
+「修了生」に自社の動画講座を再販してもらい、売上の一部(既定10%)を自動的に受け取る仕組みです。
+Stripe Connectの **Direct Charges** 方式を採用しており、決済の当事者はエンドユーザーと修了生になります
+(売上金は修了生のStripeアカウントに直接入金され、返金対応・特定商取引法上の責任も修了生側が負います)。
+このサイト自身が保有する動画のみを対象とした、2者間のレベニューシェアです
+(修了生が独自コンテンツを販売できるようにするマーケットプレイス化は将来のフェーズです)。
+
+### 使い方
+
+1. 管理者が `/admin/resellers` で対象ユーザーを「修了生」に設定する(初回設定時に紹介リンク用のスラッグを自動発行)
+2. 同じ画面から、その修了生の特定商取引法に基づく表記(事業者名・住所・電話番号・連絡先)を入力する
+3. 修了生は自分のマイページ(`/dashboard`)からStripeアカウントを連携する(Stripe Connect Expressのオンボーディング画面へ遷移)
+4. 連携完了後、マイページに紹介リンク(`https://<サイトURL>/?ref=<スラッグ>`)が表示される
+5. このリンク経由でアクセスしたユーザーが講座を購入すると、代金は修了生のStripeアカウントに入金され、
+   `application_fee`(既定10%)だけがプラットフォーム側のStripeアカウントに自動的に入る
+6. 紹介リンク経由の講座ページには、修了生の特定商取引法表記が動的に表示される(PayPalボタンは非表示になる。Direct Charge方式に対応していないため)
+
+### Stripe Connect側で必要な設定(あなた自身の対応が必要)
+
+1. Stripeダッシュボードで [Connect](https://dashboard.stripe.com/connect/accounts/overview) を有効化(事業者情報の登録・審査が必要)
+2. Webhookエンドポイントの設定画面で、**「Listen to events on Connected accounts」** を有効にした上で
+   `checkout.session.completed` イベントを購読(通常のプラットフォーム側Webhookと同じエンドポイント・同じ署名シークレットで共通化できます)
+
+### DBスキーマの反映
+
+このブランチでは`prisma/schema.prisma`に`User`(修了生関連フィールド)と`Purchase`(`resellerId`, `applicationFeeJpy`)への追加があります。
+既存の本番DBに反映する場合は、`npx prisma db push` を実行するか、以下のSQLを直接実行してください。
+
+```sql
+ALTER TABLE "User" ADD COLUMN     "businessAddress" TEXT,
+ADD COLUMN     "businessEmail" TEXT,
+ADD COLUMN     "businessName" TEXT,
+ADD COLUMN     "businessPhone" TEXT,
+ADD COLUMN     "isReseller" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "resellerSlug" TEXT,
+ADD COLUMN     "stripeAccountId" TEXT,
+ADD COLUMN     "stripeOnboardingComplete" BOOLEAN NOT NULL DEFAULT false;
+
+ALTER TABLE "Purchase" ADD COLUMN     "applicationFeeJpy" INTEGER,
+ADD COLUMN     "resellerId" TEXT;
+
+CREATE UNIQUE INDEX "User_resellerSlug_key" ON "User"("resellerSlug");
+
+ALTER TABLE "Purchase" ADD CONSTRAINT "Purchase_resellerId_fkey" FOREIGN KEY ("resellerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+```
+
+### 既知の制約(フェーズ1のスコープ)
+
+- 対象は単品購入のみ(会員プラン/サブスクリプションは非対応)
+- PayPalは非対応(紹介リンク経由の購入ではStripeのみ表示)
+- 修了生の認定は管理者による手動設定(オンライン受講からの自動認定は将来のフェーズ)
+- 修了生が独自コンテンツを販売する仕組み・複数者への収益分配は未対応(将来のフェーズ)
 
 ## 動画の追加方法
 

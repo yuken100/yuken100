@@ -5,12 +5,13 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
+import ResellerPanel from "@/components/ResellerPanel";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login?callbackUrl=/dashboard");
 
-  const [purchases, subscription] = await Promise.all([
+  const [purchases, subscription, user, resellerSales] = await Promise.all([
     prisma.purchase.findMany({
       where: { userId: session.user.id, status: "PAID" },
       include: { video: true },
@@ -21,7 +22,16 @@ export default async function DashboardPage() {
       include: { plan: true },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.user.findUnique({ where: { id: session.user.id } }),
+    prisma.purchase.findMany({
+      where: { resellerId: session.user.id, status: "PAID" },
+    }),
   ]);
+
+  const totalEarnedJpy = resellerSales.reduce(
+    (sum, sale) => sum + (sale.amountJpy - (sale.applicationFeeJpy ?? 0)),
+    0
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
@@ -58,6 +68,16 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      {user?.isReseller && (
+        <ResellerPanel
+          resellerSlug={user.resellerSlug}
+          stripeOnboardingComplete={user.stripeOnboardingComplete}
+          siteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}
+          totalSales={resellerSales.length}
+          totalEarnedJpy={totalEarnedJpy}
+        />
+      )}
 
       <section className="mt-10">
         <h2 className="font-display text-lg font-bold text-tiffany-900">
