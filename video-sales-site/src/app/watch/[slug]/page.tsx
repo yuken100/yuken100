@@ -7,14 +7,18 @@ import { canWatchVideo } from "@/lib/access";
 import VideoPlayer from "@/components/VideoPlayer";
 
 export default async function WatchPage({ params }: { params: { slug: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) redirect(`/login?callbackUrl=/watch/${params.slug}`);
-
   const video = await prisma.video.findUnique({ where: { slug: params.slug } });
-  if (!video) notFound();
+  if (!video || !video.published) notFound();
 
-  const unlocked = await canWatchVideo(session.user.id, video.id);
-  if (!unlocked) redirect(`/courses/${video.slug}`);
+  const isFree = video.priceJpy === 0 && !video.membersOnly;
+
+  if (!isFree) {
+    const session = await getServerSession(authOptions);
+    if (!session) redirect(`/login?callbackUrl=/watch/${params.slug}`);
+
+    const unlocked = await canWatchVideo(session.user.id, video.id);
+    if (!unlocked) redirect(`/courses/${video.slug}`);
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">

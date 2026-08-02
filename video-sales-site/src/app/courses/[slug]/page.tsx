@@ -19,6 +19,7 @@ export default async function CourseDetailPage({
   const session = await getServerSession(authOptions);
   const unlocked = session ? await canWatchVideo(session.user.id, video.id) : false;
   const reseller = await getReferringReseller();
+  const isFree = video.priceJpy === 0 && !video.membersOnly;
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -42,6 +43,9 @@ export default async function CourseDetailPage({
             {video.membersOnly && (
               <span className="rounded-full bg-blush-100 px-3 py-1 text-blush-300">会員限定</span>
             )}
+            {isFree && (
+              <span className="rounded-full bg-tiffany-100 px-3 py-1 text-tiffany-600">無料</span>
+            )}
           </div>
 
           <h1 className="mt-4 font-display text-2xl font-bold text-tiffany-900 md:text-3xl">
@@ -55,16 +59,22 @@ export default async function CourseDetailPage({
         <div className="md:col-span-2">
           <div className="rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
             <p className="text-3xl font-bold text-tiffany-900">
-              ¥{video.priceJpy.toLocaleString()}
-              <span className="text-sm font-medium text-tiffany-800/60"> (税込)</span>
+              {isFree ? (
+                "無料"
+              ) : (
+                <>
+                  ¥{video.priceJpy.toLocaleString()}
+                  <span className="text-sm font-medium text-tiffany-800/60"> (税込)</span>
+                </>
+              )}
             </p>
 
-            {unlocked ? (
+            {isFree || unlocked ? (
               <Link
                 href={`/watch/${video.slug}`}
                 className="mt-6 block rounded-full bg-tiffany-500 px-6 py-3 text-center text-sm font-semibold text-white shadow-soft hover:bg-tiffany-600"
               >
-                視聴する
+                {isFree ? "無料で視聴する" : "視聴する"}
               </Link>
             ) : (
               <div className="mt-6">
