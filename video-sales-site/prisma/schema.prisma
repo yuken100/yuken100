@@ -20,6 +20,18 @@ model User {
   createdAt     DateTime       @default(now())
   purchases     Purchase[]
   subscriptions Subscription[]
+
+  // Reseller (修了生) program — Phase 1: resells the platform's own catalog
+  // via Stripe Connect Direct Charges, keeping a share of each sale.
+  isReseller               Boolean    @default(false)
+  resellerSlug             String?    @unique
+  stripeAccountId          String?
+  stripeOnboardingComplete Boolean    @default(false)
+  businessName             String?
+  businessAddress          String?
+  businessPhone            String?
+  businessEmail            String?
+  resellerSales            Purchase[] @relation("ResellerSales")
 }
 
 model Video {
@@ -63,6 +75,14 @@ model Purchase {
   providerRef String?
   status      String   @default("PAID")
   createdAt   DateTime @default(now())
+
+  // Set when the purchase was made through a reseller's referral link.
+  // The reseller received (amountJpy - applicationFeeJpy) directly in their
+  // own Stripe account via a Direct Charge; applicationFeeJpy is the
+  // platform's cut, collected automatically at the time of the charge.
+  resellerId        String?
+  reseller          User?   @relation("ResellerSales", fields: [resellerId], references: [id])
+  applicationFeeJpy Int?
 
   @@unique([userId, videoId])
 }

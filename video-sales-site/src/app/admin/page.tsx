@@ -21,12 +21,20 @@ export default async function AdminPage() {
     <div className="mx-auto max-w-6xl px-6 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-display text-3xl font-bold text-tiffany-900">管理画面</h1>
-        <Link
-          href="/admin/videos/new"
-          className="rounded-full bg-tiffany-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-tiffany-600"
-        >
-          + 新しい動画を追加
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/admin/resellers"
+            className="rounded-full border border-tiffany-300 px-5 py-2.5 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
+          >
+            販売代理店を管理
+          </Link>
+          <Link
+            href="/admin/videos/new"
+            className="rounded-full bg-tiffany-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-tiffany-600"
+          >
+            + 新しい動画を追加
+          </Link>
+        </div>
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">

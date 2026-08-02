@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canWatchVideo } from "@/lib/access";
+import { getReferringReseller } from "@/lib/referral";
 import VideoThumb from "@/components/VideoThumb";
 import PurchaseButtons from "@/components/PurchaseButtons";
 
@@ -17,6 +18,7 @@ export default async function CourseDetailPage({
 
   const session = await getServerSession(authOptions);
   const unlocked = session ? await canWatchVideo(session.user.id, video.id) : false;
+  const reseller = await getReferringReseller();
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -66,7 +68,11 @@ export default async function CourseDetailPage({
               </Link>
             ) : (
               <div className="mt-6">
-                <PurchaseButtons videoId={video.id} membersOnly={video.membersOnly} />
+                <PurchaseButtons
+                  videoId={video.id}
+                  membersOnly={video.membersOnly}
+                  viaReseller={Boolean(reseller)}
+                />
               </div>
             )}
 
@@ -76,6 +82,16 @@ export default async function CourseDetailPage({
                 詳しく見る
               </Link>
             </p>
+
+            {reseller && !unlocked && (
+              <div className="mt-4 rounded-lg bg-tiffany-50 p-4 text-xs text-tiffany-800/70">
+                <p className="font-semibold text-tiffany-800">販売事業者情報</p>
+                <p className="mt-1">{reseller.businessName ?? reseller.name}</p>
+                {reseller.businessAddress && <p>{reseller.businessAddress}</p>}
+                {reseller.businessPhone && <p>{reseller.businessPhone}</p>}
+                {reseller.businessEmail && <p>{reseller.businessEmail}</p>}
+              </div>
+            )}
           </div>
         </div>
       </div>
