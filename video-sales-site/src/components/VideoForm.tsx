@@ -146,12 +146,13 @@ export default function VideoForm({
             className="input"
           />
         </Field>
-        <Field label="動画URL (mp4)">
+        <Field label="動画URL (Vimeo・YouTubeのリンク、または直接のmp4ファイルURL)">
           <input
             required
             value={values.videoUrl}
             onChange={(e) => update("videoUrl", e.target.value)}
             className="input"
+            placeholder="例: https://vimeo.com/123456789"
           />
         </Field>
       </div>

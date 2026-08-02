@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canWatchVideo } from "@/lib/access";
+import VideoPlayer from "@/components/VideoPlayer";
 
 export default async function WatchPage({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions);
@@ -24,10 +25,7 @@ export default async function WatchPage({ params }: { params: { slug: string } }
       <h1 className="mt-4 font-display text-2xl font-bold text-tiffany-900">{video.title}</h1>
 
       <div className="mt-6 overflow-hidden rounded-xl2 bg-black shadow-soft">
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-        <video controls className="aspect-video w-full" poster="" preload="metadata">
-          <source src={video.videoUrl} type="video/mp4" />
-        </video>
+        <VideoPlayer videoUrl={video.videoUrl} />
       </div>
 
       <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-tiffany-800/80">
