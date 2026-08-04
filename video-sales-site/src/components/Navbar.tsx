@@ -7,7 +7,12 @@ export default async function Navbar() {
 
   const links = [
     { href: "/courses", label: "講座一覧" },
-    ...(showLessons ? [{ href: "/lessons", label: "レッスン予約" }] : []),
+    ...(showLessons
+      ? [
+          { href: "/lessons", label: "レッスン予約" },
+          { href: "/lessons/calendar", label: "カレンダー" },
+        ]
+      : []),
     { href: "/pricing", label: "料金プラン" },
     { href: "/about", label: "スタジオについて" },
   ];
