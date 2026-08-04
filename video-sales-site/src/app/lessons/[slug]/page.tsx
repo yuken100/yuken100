@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isProPlan } from "@/lib/plan";
+import { formatJstDateTime } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import VideoThumb from "@/components/VideoThumb";
 import BookSlotButton from "@/components/BookSlotButton";
@@ -91,13 +92,7 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
                   >
                     <div>
                       <p className="text-sm font-semibold text-tiffany-900">
-                        {slot.startAt.toLocaleString("ja-JP", {
-                          year: "numeric",
-                          month: "numeric",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatJstDateTime(slot.startAt)}
                       </p>
                       <p className="mt-1 text-xs text-tiffany-800/60">
                         {full ? "満席" : `残り${remaining}枠`}

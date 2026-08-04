@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getReferringReseller, platformFeeJpy } from "@/lib/referral";
 import { isProPlan } from "@/lib/plan";
+import { formatJstDateTime } from "@/lib/datetime";
 
 const bodySchema = z.union([
   z.object({ type: z.literal("video"), videoId: z.string() }),
@@ -129,7 +130,7 @@ export async function POST(request: Request) {
               currency: "jpy",
               unit_amount: slot.lesson.priceJpy,
               product_data: {
-                name: `${slot.lesson.title}(${slot.startAt.toLocaleString("ja-JP")})`,
+                name: `${slot.lesson.title}(${formatJstDateTime(slot.startAt)})`,
               },
             },
           },

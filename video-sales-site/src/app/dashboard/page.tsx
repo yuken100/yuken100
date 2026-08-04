@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isProPlan } from "@/lib/plan";
+import { formatJstDate, formatJstDateTime } from "@/lib/datetime";
 import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
 import ResellerPanel from "@/components/ResellerPanel";
@@ -59,7 +60,7 @@ export default async function DashboardPage() {
               <p className="text-sm font-semibold text-tiffany-800">{subscription.plan.name}</p>
               <p className="mt-1 text-xs text-tiffany-800/60">
                 {subscription.currentPeriodEnd
-                  ? `次回更新日: ${subscription.currentPeriodEnd.toLocaleDateString("ja-JP")}`
+                  ? `次回更新日: ${formatJstDate(subscription.currentPeriodEnd)}`
                   : "有効期限なし"}
               </p>
             </div>
@@ -104,13 +105,7 @@ export default async function DashboardPage() {
                       {booking.lessonSlot.lesson.title}
                     </p>
                     <p className="mt-1 text-xs text-tiffany-800/60">
-                      {booking.lessonSlot.startAt.toLocaleString("ja-JP", {
-                        year: "numeric",
-                        month: "numeric",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatJstDateTime(booking.lessonSlot.startAt)}
                       {booking.lessonSlot.lesson.location &&
                         ` ・ ${booking.lessonSlot.lesson.location}`}
                     </p>
