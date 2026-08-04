@@ -33,6 +33,8 @@ const defaultValues: LessonFormValues = {
   published: true,
 };
 
+type SlotRow = { startAt: string; capacityOverride: string };
+
 export default function LessonForm({
   lessonId,
   initialValues,
@@ -49,9 +51,22 @@ export default function LessonForm({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [slotRows, setSlotRows] = useState<SlotRow[]>([{ startAt: "", capacityOverride: "" }]);
 
   function update<K extends keyof LessonFormValues>(key: K, value: LessonFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function updateSlotRow(index: number, patch: Partial<SlotRow>) {
+    setSlotRows((prev) => prev.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  }
+
+  function addSlotRow() {
+    setSlotRows((prev) => [...prev, { startAt: "", capacityOverride: "" }]);
+  }
+
+  function removeSlotRow(index: number) {
+    setSlotRows((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -69,12 +84,38 @@ export default function LessonForm({
     });
     const data = await res.json().catch(() => ({}));
 
-    setLoading(false);
     if (!res.ok) {
+      setLoading(false);
       setError(data.error ?? "保存に失敗しました。");
       return;
     }
 
+    if (!lessonId) {
+      const rowsToCreate = slotRows.filter((row) => row.startAt);
+      const results = await Promise.all(
+        rowsToCreate.map((row) =>
+          fetch(`/api/admin/lessons/${data.id}/slots`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              startAt: new Date(row.startAt).toISOString(),
+              capacityOverride: row.capacityOverride ? Number(row.capacityOverride) : null,
+            }),
+          })
+        )
+      );
+      setLoading(false);
+
+      if (results.some((r) => !r.ok)) {
+        setError("レッスンは作成されましたが、一部の予約枠の登録に失敗しました。枠の管理画面で確認してください。");
+      }
+
+      router.push(`/admin/lessons/${data.id}/slots`);
+      router.refresh();
+      return;
+    }
+
+    setLoading(false);
     router.push("/admin/lessons");
     router.refresh();
   }
@@ -205,6 +246,55 @@ export default function LessonForm({
         />
         公開する
       </label>
+
+      {!lessonId && (
+        <div className="rounded-xl2 border border-tiffany-100 bg-tiffany-50/50 p-5">
+          <p className="text-sm font-semibold text-tiffany-800">
+            最初の予約枠(あとから追加・編集もできます)
+          </p>
+          <div className="mt-3 space-y-3">
+            {slotRows.map((row, index) => (
+              <div key={index} className="flex flex-wrap items-end gap-3">
+                <label className="text-xs font-medium text-tiffany-800">
+                  日時
+                  <input
+                    type="datetime-local"
+                    value={row.startAt}
+                    onChange={(e) => updateSlotRow(index, { startAt: e.target.value })}
+                    className="input mt-1"
+                  />
+                </label>
+                <label className="text-xs font-medium text-tiffany-800">
+                  定員(空欄でレッスンの定員を使用)
+                  <input
+                    type="number"
+                    min={1}
+                    value={row.capacityOverride}
+                    onChange={(e) => updateSlotRow(index, { capacityOverride: e.target.value })}
+                    className="input mt-1 w-48"
+                  />
+                </label>
+                {slotRows.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSlotRow(index)}
+                    className="text-xs font-semibold text-red-500 hover:text-red-700"
+                  >
+                    削除
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addSlotRow}
+            className="mt-3 text-xs font-semibold text-tiffany-600 hover:text-tiffany-800"
+          >
+            + 枠を追加
+          </button>
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
