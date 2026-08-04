@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/require-admin";
 import { isProPlan } from "@/lib/plan";
+import { formatJstDateTime } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import AddSlotForm from "@/components/AddSlotForm";
 import CancelSlotButton from "@/components/CancelSlotButton";
@@ -56,13 +57,7 @@ export default async function LessonSlotsPage({ params }: { params: { id: string
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p className="font-semibold text-tiffany-900">
-                      {slot.startAt.toLocaleString("ja-JP", {
-                        year: "numeric",
-                        month: "numeric",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatJstDateTime(slot.startAt)}
                     </p>
                     <p className="mt-1 text-sm text-tiffany-800/70">
                       予約 {slot.bookings.length} / {capacity}人
