@@ -7,6 +7,7 @@ import { isProPlan } from "@/lib/plan";
 import { formatJstDate, formatJstDateTime } from "@/lib/datetime";
 import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
+import CancelBookingButton from "@/components/CancelBookingButton";
 import ResellerPanel from "@/components/ResellerPanel";
 
 export default async function DashboardPage() {
@@ -29,10 +30,13 @@ export default async function DashboardPage() {
       where: { resellerId: session.user.id, status: "PAID" },
     }),
     isProPlan(),
+    // Includes CANCELLED bookings for still-upcoming slots too, so a
+    // cancellation stays visible as confirmation instead of just vanishing
+    // from the list — it naturally drops off once the slot's time passes.
     prisma.lessonBooking.findMany({
       where: {
         userId: session.user.id,
-        status: { in: ["CONFIRMED", "PENDING"] },
+        status: { in: ["CONFIRMED", "PENDING", "CANCELLED"] },
         lessonSlot: { startAt: { gt: new Date() } },
       },
       include: { lessonSlot: { include: { lesson: true } } },
@@ -84,7 +88,7 @@ export default async function DashboardPage() {
       {showLessons && (
         <section className="mt-10 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
           <h2 className="font-display text-lg font-bold text-tiffany-900">
-            予約中のレッスン ({bookings.length})
+            予約中のレッスン ({bookings.filter((booking) => booking.status !== "CANCELLED").length})
           </h2>
           {bookings.length === 0 ? (
             <p className="mt-3 text-sm text-tiffany-800/70">
@@ -106,6 +110,11 @@ export default async function DashboardPage() {
                       {booking.status === "PENDING" && (
                         <span className="ml-2 text-xs font-semibold text-red-500">確認待ち</span>
                       )}
+                      {booking.status === "CANCELLED" && (
+                        <span className="ml-2 text-xs font-semibold text-tiffany-800/50">
+                          キャンセル済み
+                        </span>
+                      )}
                     </p>
                     <p className="mt-1 text-xs text-tiffany-800/60">
                       {formatJstDateTime(booking.lessonSlot.startAt)}
@@ -118,15 +127,20 @@ export default async function DashboardPage() {
                       </p>
                     )}
                   </div>
-                  {booking.status === "CONFIRMED" && booking.lessonSlot.lesson.onlineUrl && (
-                    <a
-                      href={booking.lessonSlot.lesson.onlineUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-full border border-tiffany-300 px-4 py-2 text-xs font-semibold text-tiffany-700 hover:bg-tiffany-50"
-                    >
-                      参加リンク
-                    </a>
+                  {booking.status !== "CANCELLED" && (
+                    <div className="flex items-center gap-3">
+                      {booking.status === "CONFIRMED" && booking.lessonSlot.lesson.onlineUrl && (
+                        <a
+                          href={booking.lessonSlot.lesson.onlineUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-full border border-tiffany-300 px-4 py-2 text-xs font-semibold text-tiffany-700 hover:bg-tiffany-50"
+                        >
+                          参加リンク
+                        </a>
+                      )}
+                      <CancelBookingButton bookingId={booking.id} />
+                    </div>
                   )}
                 </li>
               ))}
