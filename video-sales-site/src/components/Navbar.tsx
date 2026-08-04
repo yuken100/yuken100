@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AuthButtons from "@/components/AuthButtons";
+import MobileNav from "@/components/MobileNav";
 import { isProPlan } from "@/lib/plan";
 
 export default async function Navbar() {
@@ -18,7 +19,7 @@ export default async function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-tiffany-100 bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-tiffany-100 bg-white/80 backdrop-blur relative">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-2 font-display text-lg font-bold text-tiffany-700">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-tiffany-300 text-white">
@@ -37,7 +38,10 @@ export default async function Navbar() {
             </Link>
           ))}
         </div>
-        <AuthButtons />
+        <div className="flex items-center gap-2">
+          <AuthButtons />
+          <MobileNav links={links} />
+        </div>
       </nav>
     </header>
   );
