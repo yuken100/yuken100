@@ -54,6 +54,27 @@ export async function POST(request: Request) {
       }
     }
 
+    if (metadata.type === "lesson_slot" && metadata.slotId && metadata.userId) {
+      const slot = await prisma.lessonSlot.findUnique({
+        where: { id: metadata.slotId },
+        include: { lesson: true },
+      });
+      if (slot) {
+        await prisma.lessonBooking.upsert({
+          where: { userId_lessonSlotId: { userId: metadata.userId, lessonSlotId: slot.id } },
+          update: { status: "CONFIRMED" },
+          create: {
+            userId: metadata.userId,
+            lessonSlotId: slot.id,
+            amountJpy: slot.lesson.priceJpy,
+            provider: "stripe",
+            providerRef: checkoutSession.id,
+            status: "CONFIRMED",
+          },
+        });
+      }
+    }
+
     if (metadata.type === "plan" && metadata.planKey && metadata.userId) {
       const plan = await prisma.plan.findUnique({ where: { key: metadata.planKey } });
       if (plan) {
