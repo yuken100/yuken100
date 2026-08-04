@@ -160,11 +160,27 @@ model LessonBooking {
   user         User       @relation(fields: [userId], references: [id])
   lessonSlotId String
   lessonSlot   LessonSlot @relation(fields: [lessonSlotId], references: [id])
-  status       String     @default("CONFIRMED") // CONFIRMED | CANCELLED
+  status       String     @default("CONFIRMED") // CONFIRMED | PENDING | CANCELLED
   amountJpy    Int
   provider     String
   providerRef  String?
   createdAt    DateTime   @default(now())
 
+  // Only set for ¥0 bookings, which skip Stripe and confirm via emailed
+  // link instead (see /lessons/confirm). A PENDING booking still counts
+  // toward the slot's capacity so two people can't claim the same free
+  // spot while one of them hasn't confirmed yet.
+  confirmation LessonBookingConfirmation?
+
   @@unique([userId, lessonSlotId])
+}
+
+model LessonBookingConfirmation {
+  id        String        @id @default(cuid())
+  bookingId String        @unique
+  booking   LessonBooking @relation(fields: [bookingId], references: [id])
+  token     String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
 }

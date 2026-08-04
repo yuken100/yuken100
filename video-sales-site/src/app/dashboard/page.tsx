@@ -32,7 +32,7 @@ export default async function DashboardPage() {
     prisma.lessonBooking.findMany({
       where: {
         userId: session.user.id,
-        status: "CONFIRMED",
+        status: { in: ["CONFIRMED", "PENDING"] },
         lessonSlot: { startAt: { gt: new Date() } },
       },
       include: { lessonSlot: { include: { lesson: true } } },
@@ -103,14 +103,22 @@ export default async function DashboardPage() {
                   <div>
                     <p className="text-sm font-semibold text-tiffany-900">
                       {booking.lessonSlot.lesson.title}
+                      {booking.status === "PENDING" && (
+                        <span className="ml-2 text-xs font-semibold text-red-500">確認待ち</span>
+                      )}
                     </p>
                     <p className="mt-1 text-xs text-tiffany-800/60">
                       {formatJstDateTime(booking.lessonSlot.startAt)}
                       {booking.lessonSlot.lesson.location &&
                         ` ・ ${booking.lessonSlot.lesson.location}`}
                     </p>
+                    {booking.status === "PENDING" && (
+                      <p className="mt-1 text-xs text-tiffany-800/70">
+                        メール内のリンクをクリックすると予約が完了します。
+                      </p>
+                    )}
                   </div>
-                  {booking.lessonSlot.lesson.onlineUrl && (
+                  {booking.status === "CONFIRMED" && booking.lessonSlot.lesson.onlineUrl && (
                     <a
                       href={booking.lessonSlot.lesson.onlineUrl}
                       target="_blank"

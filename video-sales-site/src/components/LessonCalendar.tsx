@@ -13,6 +13,8 @@ export type CalendarSlot = {
   remaining: number;
   capacity: number;
   full: boolean;
+  priceJpy: number;
+  myStatus: "CONFIRMED" | "PENDING" | null;
 };
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -161,12 +163,20 @@ export default function LessonCalendar({
                   >
                     ログインして予約
                   </Link>
+                ) : slot.myStatus === "CONFIRMED" ? (
+                  <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-700">
+                    予約済み
+                  </span>
+                ) : slot.myStatus === "PENDING" ? (
+                  <p className="text-xs text-tiffany-800/70">
+                    確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
+                  </p>
                 ) : slot.full ? (
                   <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-800/50">
                     満席
                   </span>
                 ) : (
-                  <BookSlotButton slotId={slot.id} />
+                  <BookSlotButton slotId={slot.id} priceJpy={slot.priceJpy} />
                 )}
               </div>
             </div>

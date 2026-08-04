@@ -3,20 +3,31 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function BookSlotButton({ slotId }: { slotId: string }) {
+export default function BookSlotButton({
+  slotId,
+  priceJpy,
+}: {
+  slotId: string;
+  priceJpy: number;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const isFree = priceJpy === 0;
 
   async function handleBook() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/checkout/stripe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "lesson_slot", slotId }),
-      });
+      const res = await fetch(
+        isFree ? `/api/lessons/slots/${slotId}/book-free` : "/api/checkout/stripe",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: isFree ? undefined : JSON.stringify({ type: "lesson_slot", slotId }),
+        }
+      );
 
       if (res.status === 401) {
         router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
@@ -30,6 +41,11 @@ export default function BookSlotButton({ slotId }: { slotId: string }) {
         return;
       }
 
+      if (isFree) {
+        setPending(true);
+        return;
+      }
+
       if (data.url) {
         window.location.href = data.url;
       }
@@ -38,6 +54,17 @@ export default function BookSlotButton({ slotId }: { slotId: string }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (pending) {
+    return (
+      <div className="max-w-xs space-y-1">
+        <p className="text-sm font-bold text-red-500">まだ予約は完了していません</p>
+        <p className="text-xs text-tiffany-800/70">
+          ご登録のメールアドレスに予約確認メールをお送りしました。メール内のリンクをクリックすると予約が完了します。
+        </p>
+      </div>
+    );
   }
 
   return (
