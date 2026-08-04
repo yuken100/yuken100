@@ -18,3 +18,23 @@ export function formatJstDateTime(date: Date): string {
 export function formatJstDate(date: Date): string {
   return date.toLocaleDateString("ja-JP", { timeZone: JST });
 }
+
+export function formatJstTime(date: Date): string {
+  return date.toLocaleTimeString("ja-JP", {
+    timeZone: JST,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// Returns "YYYY-MM-DD" for the given instant, as a JST calendar date —
+// used as a grouping key so a slot always lands on the day an admin/user
+// would actually call "today" in Japan, regardless of server timezone.
+export function jstDateKey(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: JST,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
