@@ -1,13 +1,17 @@
 import Link from "next/link";
 import AuthButtons from "@/components/AuthButtons";
+import { isProPlan } from "@/lib/plan";
 
-const links = [
-  { href: "/courses", label: "講座一覧" },
-  { href: "/pricing", label: "料金プラン" },
-  { href: "/about", label: "スタジオについて" },
-];
+export default async function Navbar() {
+  const showLessons = await isProPlan();
 
-export default function Navbar() {
+  const links = [
+    { href: "/courses", label: "講座一覧" },
+    ...(showLessons ? [{ href: "/lessons", label: "レッスン予約" }] : []),
+    { href: "/pricing", label: "料金プラン" },
+    { href: "/about", label: "スタジオについて" },
+  ];
+
   return (
     <header className="sticky top-0 z-40 border-b border-tiffany-100 bg-white/80 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">

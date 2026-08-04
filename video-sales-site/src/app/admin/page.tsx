@@ -2,17 +2,19 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
+import { isProPlan } from "@/lib/plan";
 import DeleteVideoButton from "@/components/DeleteVideoButton";
 
 export default async function AdminPage() {
   const session = await requireAdminSession();
   if (!session) redirect("/login?callbackUrl=/admin");
 
-  const [videos, userCount, activeSubs, purchases] = await Promise.all([
+  const [videos, userCount, activeSubs, purchases, showLessons] = await Promise.all([
     prisma.video.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.user.count(),
     prisma.subscription.count({ where: { status: "ACTIVE" } }),
     prisma.purchase.findMany({ where: { status: "PAID" } }),
+    isProPlan(),
   ]);
 
   const revenue = purchases.reduce((sum, p) => sum + p.amountJpy, 0);
@@ -21,7 +23,21 @@ export default async function AdminPage() {
     <div className="mx-auto max-w-6xl px-6 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-display text-3xl font-bold text-tiffany-900">管理画面</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/admin/settings"
+            className="rounded-full border border-tiffany-300 px-5 py-2.5 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
+          >
+            サイト設定
+          </Link>
+          {showLessons && (
+            <Link
+              href="/admin/lessons"
+              className="rounded-full border border-tiffany-300 px-5 py-2.5 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
+            >
+              レッスンを管理
+            </Link>
+          )}
           <Link
             href="/admin/resellers"
             className="rounded-full border border-tiffany-300 px-5 py-2.5 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"

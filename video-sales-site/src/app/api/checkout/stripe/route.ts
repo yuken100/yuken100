@@ -5,10 +5,12 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getReferringReseller, platformFeeJpy } from "@/lib/referral";
+import { isProPlan } from "@/lib/plan";
 
 const bodySchema = z.union([
   z.object({ type: z.literal("video"), videoId: z.string() }),
   z.object({ type: z.literal("plan"), planKey: z.string() }),
+  z.object({ type: z.literal("lesson_slot"), slotId: z.string() }),
 ]);
 
 export async function POST(request: Request) {
@@ -84,6 +86,62 @@ export async function POST(request: Request) {
             stripeAccount: reseller.stripeAccountId as string,
           })
         : await stripe.checkout.sessions.create(checkoutSessionParams);
+
+      return NextResponse.json({ url: checkoutSession.url });
+    }
+
+    if (parsed.data.type === "lesson_slot") {
+      if (!(await isProPlan())) {
+        return NextResponse.json(
+          { error: "レッスン予約機能は現在利用できません。" },
+          { status: 403 }
+        );
+      }
+
+      const slot = await prisma.lessonSlot.findUnique({
+        where: { id: parsed.data.slotId },
+        include: { lesson: true, bookings: { where: { status: "CONFIRMED" } } },
+      });
+      if (!slot || slot.status !== "OPEN" || !slot.lesson.published) {
+        return NextResponse.json({ error: "この予約枠は見つかりません。" }, { status: 404 });
+      }
+      if (slot.startAt.getTime() < Date.now()) {
+        return NextResponse.json({ error: "この予約枠は終了しています。" }, { status: 400 });
+      }
+
+      const alreadyBooked = slot.bookings.some((booking) => booking.userId === session.user.id);
+      if (alreadyBooked) {
+        return NextResponse.json({ error: "この枠は既に予約済みです。" }, { status: 400 });
+      }
+
+      const capacity = slot.capacityOverride ?? slot.lesson.capacity;
+      if (slot.bookings.length >= capacity) {
+        return NextResponse.json({ error: "この枠は満席です。" }, { status: 400 });
+      }
+
+      const checkoutSession = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer_email: session.user.email ?? undefined,
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: "jpy",
+              unit_amount: slot.lesson.priceJpy,
+              product_data: {
+                name: `${slot.lesson.title}(${slot.startAt.toLocaleString("ja-JP")})`,
+              },
+            },
+          },
+        ],
+        metadata: {
+          type: "lesson_slot",
+          slotId: slot.id,
+          userId: session.user.id,
+        },
+        success_url: `${siteUrl}/lessons/${slot.lesson.slug}?checkout=success`,
+        cancel_url: `${siteUrl}/lessons/${slot.lesson.slug}?checkout=cancel`,
+      });
 
       return NextResponse.json({ url: checkoutSession.url });
     }

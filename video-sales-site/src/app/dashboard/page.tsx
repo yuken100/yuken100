@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isProPlan } from "@/lib/plan";
 import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
 import ResellerPanel from "@/components/ResellerPanel";
@@ -11,7 +12,7 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login?callbackUrl=/dashboard");
 
-  const [purchases, subscription, user, resellerSales] = await Promise.all([
+  const [purchases, subscription, user, resellerSales, showLessons, bookings] = await Promise.all([
     prisma.purchase.findMany({
       where: { userId: session.user.id, status: "PAID" },
       include: { video: true },
@@ -25,6 +26,16 @@ export default async function DashboardPage() {
     prisma.user.findUnique({ where: { id: session.user.id } }),
     prisma.purchase.findMany({
       where: { resellerId: session.user.id, status: "PAID" },
+    }),
+    isProPlan(),
+    prisma.lessonBooking.findMany({
+      where: {
+        userId: session.user.id,
+        status: "CONFIRMED",
+        lessonSlot: { startAt: { gt: new Date() } },
+      },
+      include: { lessonSlot: { include: { lesson: true } } },
+      orderBy: { lessonSlot: { startAt: "asc" } },
     }),
   ]);
 
@@ -68,6 +79,58 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      {showLessons && (
+        <section className="mt-10 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
+          <h2 className="font-display text-lg font-bold text-tiffany-900">
+            予約中のレッスン ({bookings.length})
+          </h2>
+          {bookings.length === 0 ? (
+            <p className="mt-3 text-sm text-tiffany-800/70">
+              現在予約中のレッスンはありません。
+              <Link href="/lessons" className="ml-1 font-semibold text-tiffany-600 hover:text-tiffany-800">
+                レッスンを予約する
+              </Link>
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {bookings.map((booking) => (
+                <li
+                  key={booking.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-tiffany-100 p-4"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-tiffany-900">
+                      {booking.lessonSlot.lesson.title}
+                    </p>
+                    <p className="mt-1 text-xs text-tiffany-800/60">
+                      {booking.lessonSlot.startAt.toLocaleString("ja-JP", {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                      {booking.lessonSlot.lesson.location &&
+                        ` ・ ${booking.lessonSlot.lesson.location}`}
+                    </p>
+                  </div>
+                  {booking.lessonSlot.lesson.onlineUrl && (
+                    <a
+                      href={booking.lessonSlot.lesson.onlineUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full border border-tiffany-300 px-4 py-2 text-xs font-semibold text-tiffany-700 hover:bg-tiffany-50"
+                    >
+                      参加リンク
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       {user?.isReseller && (
         <ResellerPanel

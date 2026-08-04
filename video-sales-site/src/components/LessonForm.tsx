@@ -1,0 +1,243 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+type LessonFormValues = {
+  title: string;
+  slug: string;
+  description: string;
+  format: "ONLINE" | "OFFLINE" | "HYBRID";
+  location: string;
+  onlineUrl: string;
+  durationMinutes: number;
+  capacity: number;
+  priceJpy: number;
+  gradientFrom: string;
+  gradientTo: string;
+  published: boolean;
+};
+
+const defaultValues: LessonFormValues = {
+  title: "",
+  slug: "",
+  description: "",
+  format: "ONLINE",
+  location: "",
+  onlineUrl: "",
+  durationMinutes: 60,
+  capacity: 8,
+  priceJpy: 3300,
+  gradientFrom: "#81D8D0",
+  gradientTo: "#FFD2D9",
+  published: true,
+};
+
+export default function LessonForm({
+  lessonId,
+  initialValues,
+}: {
+  lessonId?: string;
+  initialValues?: Partial<LessonFormValues>;
+}) {
+  const router = useRouter();
+  const [values, setValues] = useState<LessonFormValues>({
+    ...defaultValues,
+    ...initialValues,
+    location: initialValues?.location ?? "",
+    onlineUrl: initialValues?.onlineUrl ?? "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function update<K extends keyof LessonFormValues>(key: K, value: LessonFormValues[K]) {
+    setValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const url = lessonId ? `/api/admin/lessons/${lessonId}` : "/api/admin/lessons";
+    const method = lessonId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    setLoading(false);
+    if (!res.ok) {
+      setError(data.error ?? "保存に失敗しました。");
+      return;
+    }
+
+    router.push("/admin/lessons");
+    router.refresh();
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label="レッスン名">
+          <input
+            required
+            value={values.title}
+            onChange={(e) => update("title", e.target.value)}
+            className="input"
+          />
+        </Field>
+        <Field label="スラッグ(URL用・半角英数)">
+          <input
+            required
+            value={values.slug}
+            onChange={(e) => update("slug", e.target.value)}
+            className="input"
+            pattern="[a-z0-9\-]+"
+          />
+        </Field>
+      </div>
+
+      <Field label="説明文">
+        <textarea
+          required
+          rows={4}
+          value={values.description}
+          onChange={(e) => update("description", e.target.value)}
+          className="input"
+        />
+      </Field>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Field label="レッスン形式">
+          <select
+            value={values.format}
+            onChange={(e) => update("format", e.target.value as LessonFormValues["format"])}
+            className="input"
+          >
+            <option value="ONLINE">オンラインのみ</option>
+            <option value="OFFLINE">対面のみ</option>
+            <option value="HYBRID">オンライン + 対面</option>
+          </select>
+        </Field>
+        <Field label="長さ(分)">
+          <input
+            required
+            type="number"
+            min={1}
+            value={values.durationMinutes}
+            onChange={(e) => update("durationMinutes", Number(e.target.value))}
+            className="input"
+          />
+        </Field>
+        <Field label="定員(人)">
+          <input
+            required
+            type="number"
+            min={1}
+            value={values.capacity}
+            onChange={(e) => update("capacity", Number(e.target.value))}
+            className="input"
+          />
+        </Field>
+      </div>
+
+      {(values.format === "OFFLINE" || values.format === "HYBRID") && (
+        <Field label="場所(対面レッスンの会場)">
+          <input
+            value={values.location}
+            onChange={(e) => update("location", e.target.value)}
+            className="input"
+            placeholder="例: 東京都渋谷区〇〇 スタジオ名"
+          />
+        </Field>
+      )}
+
+      {(values.format === "ONLINE" || values.format === "HYBRID") && (
+        <Field label="オンライン参加用URL(Zoom等)">
+          <input
+            value={values.onlineUrl}
+            onChange={(e) => update("onlineUrl", e.target.value)}
+            className="input"
+            placeholder="例: https://zoom.us/j/xxxxxxxxx"
+          />
+        </Field>
+      )}
+
+      <Field label="価格 (円)">
+        <input
+          required
+          type="number"
+          min={0}
+          value={values.priceJpy}
+          onChange={(e) => update("priceJpy", Number(e.target.value))}
+          className="input"
+        />
+      </Field>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label="サムネイル グラデーション色1">
+          <input
+            type="color"
+            value={values.gradientFrom}
+            onChange={(e) => update("gradientFrom", e.target.value)}
+            className="h-10 w-full"
+          />
+        </Field>
+        <Field label="サムネイル グラデーション色2">
+          <input
+            type="color"
+            value={values.gradientTo}
+            onChange={(e) => update("gradientTo", e.target.value)}
+            className="h-10 w-full"
+          />
+        </Field>
+      </div>
+
+      <label className="flex items-center gap-2 text-sm text-tiffany-800">
+        <input
+          type="checkbox"
+          checked={values.published}
+          onChange={(e) => update("published", e.target.checked)}
+        />
+        公開する
+      </label>
+
+      {error && <p className="text-sm text-red-500">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="rounded-full bg-tiffany-500 px-6 py-3 text-sm font-semibold text-white shadow-soft hover:bg-tiffany-600 disabled:opacity-60"
+      >
+        {loading ? "保存中..." : lessonId ? "更新する" : "追加する"}
+      </button>
+
+      <style jsx>{`
+        .input {
+          width: 100%;
+          border: 1px solid #d9f4f1;
+          border-radius: 0.5rem;
+          padding: 0.6rem 1rem;
+          font-size: 0.875rem;
+        }
+        .input:focus {
+          outline: none;
+          border-color: #5cc9be;
+        }
+      `}</style>
+    </form>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-sm font-medium text-tiffany-800">
+      {label}
+      <div className="mt-1">{children}</div>
+    </label>
+  );
+}

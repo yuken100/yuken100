@@ -34,6 +34,7 @@ model User {
   resellerSales            Purchase[] @relation("ResellerSales")
 
   passwordResetTokens PasswordResetToken[]
+  lessonBookings      LessonBooking[]
 }
 
 model PasswordResetToken {
@@ -110,4 +111,60 @@ model Subscription {
   providerRef      String?
   currentPeriodEnd DateTime?
   createdAt        DateTime  @default(now())
+}
+
+// Single-row table controlling which paid tier of the product this
+// deployment is licensed at ("BASIC" | "PRO"). Lets the same codebase be
+// delivered to different clients with features gated behind a plan, without
+// a redeploy — see src/lib/plan.ts.
+model SiteSettings {
+  id   String @id @default("singleton")
+  plan String @default("PRO")
+}
+
+// Lesson booking system (Pro-plan feature) — Phase 1: manual slot creation,
+// pay-per-booking via Stripe. Recurring schedules, waitlists, ticket packs,
+// and subscription-included bookings are later phases.
+model Lesson {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  title           String
+  description     String
+  format          String // ONLINE | OFFLINE | HYBRID
+  location        String?
+  onlineUrl       String?
+  durationMinutes Int
+  capacity        Int
+  priceJpy        Int
+  gradientFrom    String       @default("#81D8D0")
+  gradientTo      String       @default("#FFD2D9")
+  published       Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  slots           LessonSlot[]
+}
+
+model LessonSlot {
+  id               String          @id @default(cuid())
+  lessonId         String
+  lesson           Lesson          @relation(fields: [lessonId], references: [id])
+  startAt          DateTime
+  capacityOverride Int?
+  status           String          @default("OPEN") // OPEN | CANCELLED
+  createdAt        DateTime        @default(now())
+  bookings         LessonBooking[]
+}
+
+model LessonBooking {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  lessonSlotId String
+  lessonSlot   LessonSlot @relation(fields: [lessonSlotId], references: [id])
+  status       String     @default("CONFIRMED") // CONFIRMED | CANCELLED
+  amountJpy    Int
+  provider     String
+  providerRef  String?
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, lessonSlotId])
 }
