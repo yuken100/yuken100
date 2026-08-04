@@ -101,13 +101,29 @@ export async function POST(request: Request) {
 
       const slot = await prisma.lessonSlot.findUnique({
         where: { id: parsed.data.slotId },
-        include: { lesson: true, bookings: { where: { status: "CONFIRMED" } } },
+        include: {
+          lesson: true,
+          bookings: {
+            where: {
+              OR: [
+                { status: "CONFIRMED" },
+                { status: "PENDING", confirmation: { usedAt: null, expiresAt: { gt: new Date() } } },
+              ],
+            },
+          },
+        },
       });
       if (!slot || slot.status !== "OPEN" || !slot.lesson.published) {
         return NextResponse.json({ error: "この予約枠は見つかりません。" }, { status: 404 });
       }
       if (slot.startAt.getTime() < Date.now()) {
         return NextResponse.json({ error: "この予約枠は終了しています。" }, { status: 400 });
+      }
+      if (slot.lesson.priceJpy === 0) {
+        return NextResponse.json(
+          { error: "この予約枠は無料です。レッスンページから無料予約手続きをご利用ください。" },
+          { status: 400 }
+        );
       }
 
       const alreadyBooked = slot.bookings.some((booking) => booking.userId === session.user.id);

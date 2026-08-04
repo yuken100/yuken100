@@ -17,19 +17,31 @@ const formatLabel: Record<string, string> = {
 export default async function LessonDetailPage({ params }: { params: { slug: string } }) {
   if (!(await isProPlan())) notFound();
 
+  const session = await getServerSession(authOptions);
+
+  // A PENDING (unconfirmed, ¥0-only) booking still holds its spot, so it
+  // counts toward capacity the same as a CONFIRMED one — otherwise two
+  // people could claim the same free slot while one hasn't confirmed yet.
   const lesson = await prisma.lesson.findUnique({
     where: { slug: params.slug },
     include: {
       slots: {
         where: { status: "OPEN", startAt: { gt: new Date() } },
         orderBy: { startAt: "asc" },
-        include: { bookings: { where: { status: "CONFIRMED" } } },
+        include: {
+          bookings: {
+            where: {
+              OR: [
+                { status: "CONFIRMED" },
+                { status: "PENDING", confirmation: { usedAt: null, expiresAt: { gt: new Date() } } },
+              ],
+            },
+          },
+        },
       },
     },
   });
   if (!lesson || !lesson.published) notFound();
-
-  const session = await getServerSession(authOptions);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -85,6 +97,7 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
                 const capacity = slot.capacityOverride ?? lesson.capacity;
                 const remaining = capacity - slot.bookings.length;
                 const full = remaining <= 0;
+                const myBooking = slot.bookings.find((booking) => booking.userId === session?.user.id);
                 return (
                   <div
                     key={slot.id}
@@ -105,12 +118,20 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
                       >
                         ログインして予約
                       </Link>
+                    ) : myBooking?.status === "CONFIRMED" ? (
+                      <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-700">
+                        予約済み
+                      </span>
+                    ) : myBooking?.status === "PENDING" ? (
+                      <span className="max-w-xs text-right text-xs text-tiffany-800/70">
+                        確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
+                      </span>
                     ) : full ? (
                       <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-800/50">
                         満席
                       </span>
                     ) : (
-                      <BookSlotButton slotId={slot.id} />
+                      <BookSlotButton slotId={slot.id} priceJpy={lesson.priceJpy} />
                     )}
                   </div>
                 );

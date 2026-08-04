@@ -12,13 +12,23 @@ export default async function LessonSlotsPage({ params }: { params: { id: string
   if (!session) redirect(`/login?callbackUrl=/admin/lessons/${params.id}/slots`);
   if (!(await isProPlan())) notFound();
 
+  // Includes PENDING (unconfirmed, ¥0-only) bookings alongside CONFIRMED
+  // ones so the headcount here matches the capacity actually being held.
   const lesson = await prisma.lesson.findUnique({
     where: { id: params.id },
     include: {
       slots: {
         orderBy: { startAt: "asc" },
         include: {
-          bookings: { where: { status: "CONFIRMED" }, include: { user: true } },
+          bookings: {
+            where: {
+              OR: [
+                { status: "CONFIRMED" },
+                { status: "PENDING", confirmation: { usedAt: null, expiresAt: { gt: new Date() } } },
+              ],
+            },
+            include: { user: true },
+          },
         },
       },
     },
@@ -70,6 +80,9 @@ export default async function LessonSlotsPage({ params }: { params: { id: string
                     {slot.bookings.map((booking) => (
                       <li key={booking.id}>
                         {booking.user.name}({booking.user.email})
+                        {booking.status === "PENDING" && (
+                          <span className="ml-2 text-xs font-semibold text-tiffany-600">確認待ち</span>
+                        )}
                       </li>
                     ))}
                   </ul>

@@ -12,6 +12,8 @@ export default async function LessonsCalendarPage() {
 
   const session = await getServerSession(authOptions);
 
+  // A PENDING (unconfirmed, ¥0-only) booking still holds its spot, so it
+  // counts toward capacity the same as a CONFIRMED one.
   const slots = await prisma.lessonSlot.findMany({
     where: {
       status: "OPEN",
@@ -21,7 +23,14 @@ export default async function LessonsCalendarPage() {
     orderBy: { startAt: "asc" },
     include: {
       lesson: true,
-      bookings: { where: { status: "CONFIRMED" } },
+      bookings: {
+        where: {
+          OR: [
+            { status: "CONFIRMED" },
+            { status: "PENDING", confirmation: { usedAt: null, expiresAt: { gt: new Date() } } },
+          ],
+        },
+      },
     },
   });
 
@@ -31,6 +40,7 @@ export default async function LessonsCalendarPage() {
   const calendarSlots = slots.map((slot) => {
     const capacity = slot.capacityOverride ?? slot.lesson.capacity;
     const remaining = capacity - slot.bookings.length;
+    const myBooking = slot.bookings.find((booking) => booking.userId === session?.user.id);
     return {
       id: slot.id,
       lessonTitle: slot.lesson.title,
@@ -40,6 +50,8 @@ export default async function LessonsCalendarPage() {
       remaining,
       capacity,
       full: remaining <= 0,
+      priceJpy: slot.lesson.priceJpy,
+      myStatus: (myBooking?.status as "CONFIRMED" | "PENDING" | undefined) ?? null,
     };
   });
 
