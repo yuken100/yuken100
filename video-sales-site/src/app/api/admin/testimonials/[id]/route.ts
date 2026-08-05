@@ -32,6 +32,22 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     );
   }
 
+  const existing = await prisma.testimonial.findUnique({ where: { id: params.id } });
+  if (!existing) {
+    return NextResponse.json({ error: "ご感想が見つかりません。" }, { status: 404 });
+  }
+
+  // A student submission can only go live if the student checked the
+  // publish-consent box when they submitted it — the admin UI already
+  // hides the publish toggle in that case, but enforce it here too so a
+  // direct API call can't bypass consent.
+  if (existing.userId && parsed.data.published && !existing.consentToPublish) {
+    return NextResponse.json(
+      { error: "投稿者が掲載に同意していないため、公開できません。" },
+      { status: 400 }
+    );
+  }
+
   const testimonial = await prisma.testimonial.update({
     where: { id: params.id },
     data: parsed.data,

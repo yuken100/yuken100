@@ -12,6 +12,7 @@ const schema = z
     studentName: z.string().min(1),
     comment: z.string().min(1),
     rating: z.number().int().min(1).max(5).nullable().optional(),
+    consentToPublish: z.boolean().optional(),
   })
   .refine((data) => Boolean(data.videoId) !== Boolean(data.lessonId), {
     message: "講座またはレッスンのいずれか一方を指定してください。",
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { videoId, lessonId, studentName, comment, rating } = parsed.data;
+  const { videoId, lessonId, studentName, comment, rating, consentToPublish } = parsed.data;
 
   if (videoId) {
     const eligible = await canWatchVideo(session.user.id, videoId);
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
       comment,
       rating: rating ?? null,
       published: false,
+      consentToPublish: consentToPublish ?? false,
       userId: session.user.id,
       videoId: videoId ?? null,
       lessonId: lessonId ?? null,

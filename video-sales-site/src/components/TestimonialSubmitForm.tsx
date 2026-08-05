@@ -57,11 +57,6 @@ export default function TestimonialSubmitForm({
     e.preventDefault();
     setError(null);
 
-    if (!agreed) {
-      setError("サイトへの掲載に同意のうえ、チェックを入れてください。");
-      return;
-    }
-
     const comment = QUESTIONS.map((q) => answers[q.key].trim())
       .map((answer, i) => (answer ? `Q. ${QUESTIONS[i].label.replace(/(\(任意\))$/, "")}\n${answer}` : null))
       .filter(Boolean)
@@ -77,6 +72,7 @@ export default function TestimonialSubmitForm({
         studentName,
         comment,
         rating: rating ? Number(rating) : null,
+        consentToPublish: agreed,
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -146,14 +142,14 @@ export default function TestimonialSubmitForm({
           onChange={(e) => setAgreed(e.target.checked)}
           className="mt-0.5"
         />
-        回答内容とお名前をサイトに掲載することに同意します
+        サイトに掲載させていただく場合、回答内容とお名前を掲載することに同意します(任意・未チェックでも送信できます)
       </label>
 
       {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
 
       <button
         type="submit"
-        disabled={loading || !agreed}
+        disabled={loading}
         className="mt-4 rounded-full bg-tiffany-500 px-6 py-2.5 text-sm font-semibold text-white shadow-soft hover:bg-tiffany-600 disabled:opacity-60"
       >
         {loading ? "送信中..." : "送信する"}

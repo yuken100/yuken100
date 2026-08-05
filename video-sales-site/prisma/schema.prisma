@@ -154,6 +154,12 @@ model Testimonial {
   lesson        Lesson?  @relation(fields: [lessonId], references: [id])
   userId        String?
   user          User?    @relation(fields: [userId], references: [id])
+
+  // Only meaningful for student self-submissions (userId set) — whether they
+  // checked the "publish this" consent box. Not required to submit, since an
+  // unpublished answer is still useful as internal feedback. The admin
+  // approval UI must not let published be set true without this being true.
+  consentToPublish Boolean @default(false)
 }
 
 // Lesson booking system (Pro-plan feature) — Phase 1: manual slot creation,
