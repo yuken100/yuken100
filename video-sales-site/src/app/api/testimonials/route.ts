@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const eligible = await canWatchVideo(session.user.id, videoId);
     if (!eligible) {
       return NextResponse.json(
-        { error: "この講座を受講した方のみ口コミを投稿できます。" },
+        { error: "この講座を受講した方のみご感想を投稿できます。" },
         { status: 403 }
       );
     }
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     });
     if (existing) {
       return NextResponse.json(
-        { error: "この講座にはすでに口コミを投稿済みです。" },
+        { error: "この講座にはすでにご感想を投稿済みです。" },
         { status: 400 }
       );
     }
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     });
     if (!attended) {
       return NextResponse.json(
-        { error: "このレッスンを予約した方のみ口コミを投稿できます。" },
+        { error: "このレッスンを予約した方のみご感想を投稿できます。" },
         { status: 403 }
       );
     }
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     });
     if (existing) {
       return NextResponse.json(
-        { error: "このレッスンにはすでに口コミを投稿済みです。" },
+        { error: "このレッスンにはすでにご感想を投稿済みです。" },
         { status: 400 }
       );
     }

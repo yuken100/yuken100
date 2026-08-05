@@ -8,7 +8,7 @@ export default function DeleteTestimonialButton({ testimonialId }: { testimonial
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("この口コミを削除しますか?この操作は取り消せません。")) return;
+    if (!confirm("このご感想を削除しますか?この操作は取り消せません。")) return;
 
     setLoading(true);
     await fetch(`/api/admin/testimonials/${testimonialId}`, { method: "DELETE" });

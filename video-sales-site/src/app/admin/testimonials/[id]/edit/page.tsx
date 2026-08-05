@@ -18,7 +18,7 @@ export default async function EditTestimonialPage({ params }: { params: { id: st
   if (testimonial.userId) {
     return (
       <div className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="font-display text-2xl font-bold text-tiffany-900">口コミを確認・公開</h1>
+        <h1 className="font-display text-2xl font-bold text-tiffany-900">ご感想を確認・公開</h1>
         <TestimonialApprovalForm
           testimonialId={testimonial.id}
           studentName={testimonial.studentName}
@@ -42,7 +42,7 @@ export default async function EditTestimonialPage({ params }: { params: { id: st
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="font-display text-2xl font-bold text-tiffany-900">口コミを編集</h1>
+      <h1 className="font-display text-2xl font-bold text-tiffany-900">ご感想を編集</h1>
       <TestimonialForm
         testimonialId={testimonial.id}
         videos={videos}

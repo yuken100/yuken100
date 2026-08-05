@@ -14,7 +14,7 @@ export default async function NewTestimonialPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="font-display text-2xl font-bold text-tiffany-900">新しい口コミを追加</h1>
+      <h1 className="font-display text-2xl font-bold text-tiffany-900">新しいご感想を追加</h1>
       <TestimonialForm videos={videos} lessons={lessons} />
     </div>
   );

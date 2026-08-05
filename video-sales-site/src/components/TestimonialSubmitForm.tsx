@@ -38,7 +38,7 @@ export default function TestimonialSubmitForm({
 
     setLoading(false);
     if (!res.ok) {
-      setError(data.error ?? "投稿に失敗しました。");
+      setError(data.error ?? "送信に失敗しました。");
       return;
     }
     setSubmitted(true);
@@ -47,16 +47,16 @@ export default function TestimonialSubmitForm({
   if (submitted) {
     return (
       <div className="rounded-xl2 border border-tiffany-100 bg-white p-6 text-sm text-tiffany-800/80 shadow-sm">
-        投稿ありがとうございます。確認後にサイトへ掲載されます。
+        ご感想をありがとうございます。確認後にサイトへ掲載されます。
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
-      <h3 className="font-display text-base font-bold text-tiffany-900">口コミを投稿する</h3>
+      <h3 className="font-display text-base font-bold text-tiffany-900">ご意見・ご感想をお聞かせください</h3>
       <p className="mt-1 text-xs text-tiffany-800/60">
-        投稿内容は運営の確認後にサイトへ掲載されます。
+        サービス向上のため、率直なご感想をいただけますと幸いです。いただいた内容は、確認のうえサイトに掲載させていただく場合があります。
       </p>
       <div className="mt-4 space-y-3">
         <label className="block text-sm font-medium text-tiffany-800">
@@ -70,7 +70,7 @@ export default function TestimonialSubmitForm({
           />
         </label>
         <label className="block text-sm font-medium text-tiffany-800">
-          コメント
+          ご感想
           <textarea
             required
             rows={3}
@@ -99,7 +99,7 @@ export default function TestimonialSubmitForm({
         disabled={loading}
         className="mt-4 rounded-full bg-tiffany-500 px-6 py-2.5 text-sm font-semibold text-white shadow-soft hover:bg-tiffany-600 disabled:opacity-60"
       >
-        {loading ? "送信中..." : "投稿する"}
+        {loading ? "送信中..." : "送信する"}
       </button>
 
       <style jsx>{`

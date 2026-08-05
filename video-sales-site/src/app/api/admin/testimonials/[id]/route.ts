@@ -7,7 +7,7 @@ const testimonialSchema = z
   .object({
     studentName: z.string().min(1),
     comment: z.string().min(1),
-    photoUrl: z.string().optional(),
+    photoUrl: z.string().nullable().optional(),
     photoPosition: z.string().optional(),
     rating: z.number().int().min(1).max(5).nullable().optional(),
     published: z.boolean(),
