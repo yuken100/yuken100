@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isProPlan } from "@/lib/plan";
+import { hasActiveMembership } from "@/lib/access";
 import { formatJstDateTime } from "@/lib/datetime";
 import { sendLessonBookingConfirmationEmail } from "@/lib/email";
 
@@ -43,7 +44,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (slot.startAt.getTime() < Date.now()) {
     return NextResponse.json({ error: "この予約枠は終了しています。" }, { status: 400 });
   }
-  if (slot.lesson.priceJpy !== 0) {
+
+  const isMember = await hasActiveMembership(session.user.id);
+
+  if (slot.lesson.membersOnly && !isMember) {
+    return NextResponse.json({ error: "このレッスンは会員限定です。" }, { status: 403 });
+  }
+  if (!isMember && slot.lesson.priceJpy !== 0) {
     return NextResponse.json(
       { error: "この予約枠は無料ではありません。通常の予約手続きをご利用ください。" },
       { status: 400 }
@@ -59,6 +66,24 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const othersCount = slot.bookings.filter((booking) => booking.userId !== session.user.id).length;
   if (othersCount >= capacity) {
     return NextResponse.json({ error: "この枠は満席です。" }, { status: 400 });
+  }
+
+  // An active member skips payment and email confirmation entirely — the
+  // booking is confirmed the moment they click, same as how membership
+  // already bypasses per-video purchases.
+  if (isMember) {
+    await prisma.lessonBooking.upsert({
+      where: { userId_lessonSlotId: { userId: session.user.id, lessonSlotId: slot.id } },
+      create: {
+        userId: session.user.id,
+        lessonSlotId: slot.id,
+        status: "CONFIRMED",
+        amountJpy: 0,
+        provider: "membership",
+      },
+      update: { status: "CONFIRMED", amountJpy: 0, provider: "membership" },
+    });
+    return NextResponse.json({ ok: true, confirmed: true });
   }
 
   const token = crypto.randomBytes(32).toString("hex");

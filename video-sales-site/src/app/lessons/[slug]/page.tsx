@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isProPlan } from "@/lib/plan";
+import { hasActiveMembership } from "@/lib/access";
 import { formatJstDateTime } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import VideoThumb from "@/components/VideoThumb";
@@ -44,6 +45,8 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
   });
   if (!lesson || !lesson.published) notFound();
 
+  const isMember = session ? await hasActiveMembership(session.user.id) : false;
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
       <Link href="/lessons" className="text-sm font-medium text-tiffany-600 hover:text-tiffany-800">
@@ -67,6 +70,9 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
             </span>
             <span className="rounded-full bg-tiffany-100 px-3 py-1">{lesson.durationMinutes}分</span>
             <span className="rounded-full bg-tiffany-100 px-3 py-1">定員{lesson.capacity}人</span>
+            {lesson.membersOnly && (
+              <span className="rounded-full bg-blush-100 px-3 py-1 text-blush-300">会員限定</span>
+            )}
           </div>
 
           <h1 className="mt-4 font-display text-2xl font-bold text-tiffany-900 md:text-3xl">
@@ -132,12 +138,19 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
                           確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
                         </p>
                       </div>
+                    ) : lesson.membersOnly && !isMember ? (
+                      <div className="max-w-xs text-right text-xs text-tiffany-800/60">
+                        <p className="font-semibold text-blush-300">会員限定のレッスンです</p>
+                        <Link href="/pricing" className="font-semibold text-tiffany-600 hover:text-tiffany-800">
+                          会員プランを見る →
+                        </Link>
+                      </div>
                     ) : full ? (
                       <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-800/50">
                         満席
                       </span>
                     ) : (
-                      <BookSlotButton slotId={slot.id} priceJpy={lesson.priceJpy} />
+                      <BookSlotButton slotId={slot.id} priceJpy={lesson.priceJpy} isMember={isMember} />
                     )}
                   </div>
                 );

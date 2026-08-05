@@ -41,6 +41,7 @@ export default async function AdminLessonsPage() {
               <th className="px-4 py-3">形式</th>
               <th className="px-4 py-3">価格</th>
               <th className="px-4 py-3">定員</th>
+              <th className="px-4 py-3">会員限定</th>
               <th className="px-4 py-3">公開</th>
               <th className="px-4 py-3"></th>
             </tr>
@@ -54,6 +55,7 @@ export default async function AdminLessonsPage() {
                   ¥{lesson.priceJpy.toLocaleString()}
                 </td>
                 <td className="px-4 py-3 text-tiffany-800/70">{lesson.capacity}人</td>
+                <td className="px-4 py-3">{lesson.membersOnly ? "会員限定" : "誰でも予約可"}</td>
                 <td className="px-4 py-3">{lesson.published ? "公開中" : "非公開"}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-3">
@@ -76,7 +78,7 @@ export default async function AdminLessonsPage() {
             ))}
             {lessons.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-tiffany-800/60">
+                <td colSpan={7} className="px-4 py-8 text-center text-tiffany-800/60">
                   まだレッスンがありません。
                 </td>
               </tr>
