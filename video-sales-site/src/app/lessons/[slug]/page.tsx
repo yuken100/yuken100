@@ -7,6 +7,7 @@ import { formatJstDateTime } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import VideoThumb from "@/components/VideoThumb";
 import BookSlotButton from "@/components/BookSlotButton";
+import PendingConfirmationNotice from "@/components/PendingConfirmationNotice";
 
 const formatLabel: Record<string, string> = {
   ONLINE: "オンライン",
@@ -125,10 +126,8 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
                         予約済み
                       </span>
                     ) : myBooking?.status === "PENDING" ? (
-                      <div className="max-w-xs space-y-1 text-right">
-                        <p className="text-xs font-bold text-red-500">
-                          10分以内にメール内のリンクをクリックしないと、この予約は自動的に無効になります
-                        </p>
+                      <div className="max-w-xs space-y-2 text-right">
+                        <PendingConfirmationNotice className="text-left" />
                         <p className="text-xs text-tiffany-800/70">
                           確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
                         </p>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import PendingConfirmationNotice from "./PendingConfirmationNotice";
 
 export default function BookSlotButton({
   slotId,
@@ -58,11 +59,9 @@ export default function BookSlotButton({
 
   if (pending) {
     return (
-      <div className="max-w-xs space-y-1">
+      <div className="max-w-xs space-y-2">
         <p className="text-sm font-bold text-red-500">まだ予約は完了していません</p>
-        <p className="text-sm font-bold text-red-500">
-          10分以内にメール内のリンクをクリックしないと、この予約は自動的に無効になります
-        </p>
+        <PendingConfirmationNotice />
         <p className="text-xs text-tiffany-800/70">
           ご登録のメールアドレスに予約確認メールをお送りしました。メール内のリンクをクリックすると予約が完了します。
         </p>
