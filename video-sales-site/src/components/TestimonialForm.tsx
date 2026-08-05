@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import CloudinaryUpload from "./CloudinaryUpload";
 
 type TestimonialFormValues = {
   studentName: string;
@@ -92,13 +93,21 @@ export default function TestimonialForm({
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="写真URL(任意)">
-          <input
-            value={values.photoUrl}
-            onChange={(e) => update("photoUrl", e.target.value)}
-            className="input"
-            placeholder="例: https://example.com/student.jpg"
-          />
+        <Field label="写真(任意)">
+          {values.photoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={values.photoUrl}
+              alt="Preview"
+              className="mb-3 h-16 w-16 rounded-full object-cover"
+            />
+          )}
+          <CloudinaryUpload
+            folder="yoga-studio/testimonials"
+            onUpload={(url) => update("photoUrl", url)}
+          >
+            写真をアップロード
+          </CloudinaryUpload>
         </Field>
         <Field label="評価(任意・1〜5)">
           <input
