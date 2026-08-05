@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import VideoCard from "@/components/VideoCard";
+import TestimonialSection from "@/components/TestimonialSection";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function HomePage() {
     }),
     prisma.siteSettings.findUnique({ where: { id: "singleton" } }),
     prisma.testimonial.findMany({
-      where: { published: true },
+      where: { published: true, videoId: null, lessonId: null },
       orderBy: { createdAt: "desc" },
       take: 6,
     }),
@@ -130,50 +131,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {testimonials.length > 0 && (
-        <section className="bg-tiffany-50">
-          <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-center font-display text-2xl font-bold text-tiffany-900">
-              生徒さんの声
-            </h2>
-            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="rounded-xl2 bg-white p-6 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    {testimonial.photoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={testimonial.photoUrl}
-                        alt={testimonial.studentName}
-                        className="h-10 w-10 rounded-full object-cover"
-                        style={{ objectPosition: testimonial.photoPosition ?? "50% 50%" }}
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-tiffany-200 text-sm font-bold text-white">
-                        {testimonial.studentName.charAt(0)}
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-sm font-semibold text-tiffany-900">
-                        {testimonial.studentName}
-                      </p>
-                      {testimonial.rating && (
-                        <p className="text-xs text-tiffany-500" aria-label={`評価${testimonial.rating}`}>
-                          {"★".repeat(testimonial.rating)}
-                          {"☆".repeat(5 - testimonial.rating)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-tiffany-800/80">
-                    {testimonial.comment}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <TestimonialSection testimonials={testimonials} />
 
       <section className="mx-auto max-w-4xl px-6 py-20 text-center">
         <h2 className="font-display text-2xl font-bold text-tiffany-900">

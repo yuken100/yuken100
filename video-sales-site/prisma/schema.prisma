@@ -48,24 +48,25 @@ model PasswordResetToken {
 }
 
 model Video {
-  id                String     @id @default(cuid())
-  slug              String     @unique
+  id                String        @id @default(cuid())
+  slug              String        @unique
   title             String
   description       String
   category          String
   level             String
   durationMinutes   Int
   priceJpy          Int
-  gradientFrom      String     @default("#81D8D0")
-  gradientTo        String     @default("#FFD2D9")
+  gradientFrom      String        @default("#81D8D0")
+  gradientTo        String        @default("#FFD2D9")
   thumbnailUrl      String?
-  thumbnailPosition String     @default("50% 50%")
+  thumbnailPosition String        @default("50% 50%")
   videoUrl          String
   previewUrl        String?
-  membersOnly       Boolean    @default(false)
-  published         Boolean    @default(true)
-  createdAt         DateTime   @default(now())
+  membersOnly       Boolean       @default(false)
+  published         Boolean       @default(true)
+  createdAt         DateTime      @default(now())
   purchases         Purchase[]
+  testimonials      Testimonial[]
 }
 
 model Plan {
@@ -129,8 +130,10 @@ model SiteSettings {
   instructorPhotoPosition String  @default("50% 50%")
 }
 
-// Homepage social-proof section — only published testimonials are shown,
-// and the section itself is hidden entirely if there are none yet.
+// Social-proof testimonials — only published ones are shown. A testimonial
+// with neither videoId nor lessonId set appears on the homepage; one linked
+// to a specific video or lesson appears only on that item's detail page
+// instead. A section is hidden entirely wherever there are none to show.
 model Testimonial {
   id            String   @id @default(cuid())
   studentName   String
@@ -140,6 +143,10 @@ model Testimonial {
   rating        Int?
   published     Boolean  @default(true)
   createdAt     DateTime @default(now())
+  videoId       String?
+  video         Video?   @relation(fields: [videoId], references: [id])
+  lessonId      String?
+  lesson        Lesson?  @relation(fields: [lessonId], references: [id])
 }
 
 // Lesson booking system (Pro-plan feature) — Phase 1: manual slot creation,
@@ -148,8 +155,8 @@ model Testimonial {
 // booking at all, regardless of price. Recurring schedules, waitlists, and
 // ticket packs are later phases.
 model Lesson {
-  id                String       @id @default(cuid())
-  slug              String       @unique
+  id                String        @id @default(cuid())
+  slug              String        @unique
   title             String
   description       String
   format            String // ONLINE | OFFLINE | HYBRID
@@ -158,14 +165,15 @@ model Lesson {
   durationMinutes   Int
   capacity          Int
   priceJpy          Int
-  gradientFrom      String       @default("#81D8D0")
-  gradientTo        String       @default("#FFD2D9")
+  gradientFrom      String        @default("#81D8D0")
+  gradientTo        String        @default("#FFD2D9")
   thumbnailUrl      String?
-  thumbnailPosition String       @default("50% 50%")
-  membersOnly       Boolean      @default(false)
-  published         Boolean      @default(true)
-  createdAt         DateTime     @default(now())
+  thumbnailPosition String        @default("50% 50%")
+  membersOnly       Boolean       @default(false)
+  published         Boolean       @default(true)
+  createdAt         DateTime      @default(now())
   slots             LessonSlot[]
+  testimonials      Testimonial[]
 }
 
 model LessonSlot {

@@ -11,6 +11,7 @@ type TestimonialFormValues = {
   photoPosition: string;
   rating: string;
   published: boolean;
+  target: string; // "" | `video:${id}` | `lesson:${id}`
 };
 
 const defaultValues: TestimonialFormValues = {
@@ -20,14 +21,19 @@ const defaultValues: TestimonialFormValues = {
   photoPosition: "50% 50%",
   rating: "",
   published: true,
+  target: "",
 };
 
 export default function TestimonialForm({
   testimonialId,
   initialValues,
+  videos = [],
+  lessons = [],
 }: {
   testimonialId?: string;
   initialValues?: Partial<TestimonialFormValues>;
+  videos?: { id: string; title: string }[];
+  lessons?: { id: string; title: string }[];
 }) {
   const router = useRouter();
   const [values, setValues] = useState<TestimonialFormValues>({
@@ -49,6 +55,8 @@ export default function TestimonialForm({
     const url = testimonialId ? `/api/admin/testimonials/${testimonialId}` : "/api/admin/testimonials";
     const method = testimonialId ? "PUT" : "POST";
 
+    const [targetType, targetId] = values.target.split(":");
+
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
@@ -59,6 +67,8 @@ export default function TestimonialForm({
         photoPosition: values.photoPosition,
         rating: values.rating ? Number(values.rating) : null,
         published: values.published,
+        videoId: targetType === "video" ? targetId : null,
+        lessonId: targetType === "lesson" ? targetId : null,
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -118,6 +128,34 @@ export default function TestimonialForm({
           />
         </Field>
       </div>
+
+      <Field label="表示先(任意・未選択の場合はトップページに表示)">
+        <select
+          value={values.target}
+          onChange={(e) => update("target", e.target.value)}
+          className="input"
+        >
+          <option value="">指定なし(トップページ)</option>
+          {videos.length > 0 && (
+            <optgroup label="講座">
+              {videos.map((video) => (
+                <option key={video.id} value={`video:${video.id}`}>
+                  {video.title}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          {lessons.length > 0 && (
+            <optgroup label="レッスン">
+              {lessons.map((lesson) => (
+                <option key={lesson.id} value={`lesson:${lesson.id}`}>
+                  {lesson.title}
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+      </Field>
 
       <label className="flex items-center gap-2 text-sm text-tiffany-800">
         <input

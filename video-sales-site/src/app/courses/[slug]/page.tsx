@@ -7,6 +7,7 @@ import { canWatchVideo } from "@/lib/access";
 import { getReferringReseller } from "@/lib/referral";
 import VideoThumb from "@/components/VideoThumb";
 import PurchaseButtons from "@/components/PurchaseButtons";
+import TestimonialSection from "@/components/TestimonialSection";
 
 export default async function CourseDetailPage({
   params,
@@ -20,6 +21,10 @@ export default async function CourseDetailPage({
   const unlocked = session ? await canWatchVideo(session.user.id, video.id) : false;
   const reseller = await getReferringReseller();
   const isFree = video.priceJpy === 0 && !video.membersOnly;
+  const testimonials = await prisma.testimonial.findMany({
+    where: { published: true, videoId: video.id },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -107,6 +112,8 @@ export default async function CourseDetailPage({
           </div>
         </div>
       </div>
+
+      <TestimonialSection testimonials={testimonials} title="この講座を受けた生徒さんの声" />
     </div>
   );
 }

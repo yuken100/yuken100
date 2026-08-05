@@ -3,14 +3,20 @@ import { z } from "zod";
 import { requireAdminSession } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 
-const testimonialSchema = z.object({
-  studentName: z.string().min(1),
-  comment: z.string().min(1),
-  photoUrl: z.string().optional(),
-  photoPosition: z.string().optional(),
-  rating: z.number().int().min(1).max(5).nullable().optional(),
-  published: z.boolean(),
-});
+const testimonialSchema = z
+  .object({
+    studentName: z.string().min(1),
+    comment: z.string().min(1),
+    photoUrl: z.string().optional(),
+    photoPosition: z.string().optional(),
+    rating: z.number().int().min(1).max(5).nullable().optional(),
+    published: z.boolean(),
+    videoId: z.string().nullable().optional(),
+    lessonId: z.string().nullable().optional(),
+  })
+  .refine((data) => !(data.videoId && data.lessonId), {
+    message: "表示先は講座・レッスンのどちらか一方のみ選択できます。",
+  });
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const session = await requireAdminSession();
