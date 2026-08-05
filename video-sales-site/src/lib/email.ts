@@ -55,7 +55,7 @@ export async function sendLessonBookingConfirmationEmail(
       html: `
         <p>以下のレッスンのご予約を受け付けました。</p>
         <p><strong>${lessonTitle}</strong><br>${dateTimeLabel}</p>
-        <p>下のリンクをクリックすると予約が確定します(有効期限: 24時間)。</p>
+        <p>下のリンクをクリックすると予約が確定します(有効期限: 10分)。</p>
         <p><a href="${confirmUrl}">${confirmUrl}</a></p>
         <p>このリクエストに心当たりがない場合は、このメールを無視してください。予約は確定しません。</p>
       `,

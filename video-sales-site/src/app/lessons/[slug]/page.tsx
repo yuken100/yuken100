@@ -125,9 +125,14 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
                         予約済み
                       </span>
                     ) : myBooking?.status === "PENDING" ? (
-                      <span className="max-w-xs text-right text-xs text-tiffany-800/70">
-                        確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
-                      </span>
+                      <div className="max-w-xs space-y-1 text-right">
+                        <p className="text-xs font-bold text-red-500">
+                          10分以内にメール内のリンクをクリックしないと、この予約は自動的に無効になります
+                        </p>
+                        <p className="text-xs text-tiffany-800/70">
+                          確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
+                        </p>
+                      </div>
                     ) : full ? (
                       <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-800/50">
                         満席
