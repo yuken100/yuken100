@@ -40,10 +40,19 @@ export default async function DashboardPage() {
         status: { in: ["CONFIRMED", "PENDING", "CANCELLED"] },
         lessonSlot: { startAt: { gt: new Date() } },
       },
-      include: { lessonSlot: { include: { lesson: true } } },
+      include: { lessonSlot: { include: { lesson: true } }, confirmation: true },
       orderBy: { lessonSlot: { startAt: "asc" } },
     }),
   ]);
+
+  // A PENDING booking whose confirmation link expired without being used
+  // never got completed — the slot has already freed up automatically
+  // (see the activeBookingWhere filter in the booking routes), so this is
+  // just a record of a booking attempt that timed out, not an active hold.
+  const isExpiredPending = (booking: (typeof bookings)[number]) =>
+    booking.status === "PENDING" &&
+    !booking.confirmation?.usedAt &&
+    (booking.confirmation ? booking.confirmation.expiresAt.getTime() < Date.now() : false);
 
   const totalEarnedJpy = resellerSales.reduce(
     (sum, sale) => sum + (sale.amountJpy - (sale.applicationFeeJpy ?? 0)),
@@ -89,7 +98,12 @@ export default async function DashboardPage() {
       {showLessons && (
         <section className="mt-10 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
           <h2 className="font-display text-lg font-bold text-tiffany-900">
-            予約中のレッスン ({bookings.filter((booking) => booking.status !== "CANCELLED").length})
+            予約中のレッスン (
+            {
+              bookings.filter((booking) => booking.status !== "CANCELLED" && !isExpiredPending(booking))
+                .length
+            }
+            )
           </h2>
           {bookings.length === 0 ? (
             <p className="mt-3 text-sm text-tiffany-800/70">
@@ -100,54 +114,67 @@ export default async function DashboardPage() {
             </p>
           ) : (
             <ul className="mt-4 space-y-3">
-              {bookings.map((booking) => (
-                <li
-                  key={booking.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-tiffany-100 p-4"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-tiffany-900">
-                      {booking.lessonSlot.lesson.title}
-                      {booking.status === "PENDING" && (
-                        <span className="ml-2 text-xs font-semibold text-red-500">確認待ち</span>
+              {bookings.map((booking) => {
+                const expired = isExpiredPending(booking);
+                return (
+                  <li
+                    key={booking.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-tiffany-100 p-4"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-tiffany-900">
+                        {booking.lessonSlot.lesson.title}
+                        {booking.status === "PENDING" && !expired && (
+                          <span className="ml-2 text-xs font-semibold text-red-500">確認待ち</span>
+                        )}
+                        {expired && (
+                          <span className="ml-2 text-xs font-semibold text-tiffany-800/50">
+                            時間切れで予約できませんでした
+                          </span>
+                        )}
+                        {booking.status === "CANCELLED" && (
+                          <span className="ml-2 text-xs font-semibold text-tiffany-800/50">
+                            キャンセル済み
+                          </span>
+                        )}
+                      </p>
+                      <p className="mt-1 text-xs text-tiffany-800/60">
+                        {formatJstDateTime(booking.lessonSlot.startAt)}
+                        {booking.lessonSlot.lesson.location &&
+                          ` ・ ${booking.lessonSlot.lesson.location}`}
+                      </p>
+                      {booking.status === "PENDING" && !expired && (
+                        <div className="mt-2 max-w-sm space-y-2">
+                          <PendingConfirmationNotice />
+                          <p className="text-xs text-tiffany-800/70">
+                            メール内のリンクをクリックすると予約が完了します。
+                          </p>
+                        </div>
                       )}
-                      {booking.status === "CANCELLED" && (
-                        <span className="ml-2 text-xs font-semibold text-tiffany-800/50">
-                          キャンセル済み
-                        </span>
-                      )}
-                    </p>
-                    <p className="mt-1 text-xs text-tiffany-800/60">
-                      {formatJstDateTime(booking.lessonSlot.startAt)}
-                      {booking.lessonSlot.lesson.location &&
-                        ` ・ ${booking.lessonSlot.lesson.location}`}
-                    </p>
-                    {booking.status === "PENDING" && (
-                      <div className="mt-2 max-w-sm space-y-2">
-                        <PendingConfirmationNotice />
-                        <p className="text-xs text-tiffany-800/70">
-                          メール内のリンクをクリックすると予約が完了します。
+                      {expired && (
+                        <p className="mt-2 max-w-sm text-xs text-tiffany-800/60">
+                          確認期限(10分)内にお手続きがなかったため、この予約枠は自動的に空き枠に戻りました。ご希望の場合はお手数ですが再度予約してください。
                         </p>
+                      )}
+                    </div>
+                    {booking.status !== "CANCELLED" && !expired && (
+                      <div className="flex items-center gap-3">
+                        {booking.status === "CONFIRMED" && booking.lessonSlot.lesson.onlineUrl && (
+                          <a
+                            href={booking.lessonSlot.lesson.onlineUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-full border border-tiffany-300 px-4 py-2 text-xs font-semibold text-tiffany-700 hover:bg-tiffany-50"
+                          >
+                            参加リンク
+                          </a>
+                        )}
+                        <CancelBookingButton bookingId={booking.id} />
                       </div>
                     )}
-                  </div>
-                  {booking.status !== "CANCELLED" && (
-                    <div className="flex items-center gap-3">
-                      {booking.status === "CONFIRMED" && booking.lessonSlot.lesson.onlineUrl && (
-                        <a
-                          href={booking.lessonSlot.lesson.onlineUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-full border border-tiffany-300 px-4 py-2 text-xs font-semibold text-tiffany-700 hover:bg-tiffany-50"
-                        >
-                          参加リンク
-                        </a>
-                      )}
-                      <CancelBookingButton bookingId={booking.id} />
-                    </div>
-                  )}
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
