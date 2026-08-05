@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isProPlan } from "@/lib/plan";
+import { hasActiveMembership } from "@/lib/access";
 import { jstDateKey, formatJstTime } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import LessonCalendar from "@/components/LessonCalendar";
@@ -11,6 +12,7 @@ export default async function LessonsCalendarPage() {
   if (!(await isProPlan())) notFound();
 
   const session = await getServerSession(authOptions);
+  const isMember = session ? await hasActiveMembership(session.user.id) : false;
 
   // A PENDING (unconfirmed, ¥0-only) booking still holds its spot, so it
   // counts toward capacity the same as a CONFIRMED one.
@@ -51,6 +53,7 @@ export default async function LessonsCalendarPage() {
       capacity,
       full: remaining <= 0,
       priceJpy: slot.lesson.priceJpy,
+      membersOnly: slot.lesson.membersOnly,
       myStatus: (myBooking?.status as "CONFIRMED" | "PENDING" | undefined) ?? null,
     };
   });
@@ -73,6 +76,7 @@ export default async function LessonsCalendarPage() {
         slots={calendarSlots}
         todayKey={jstDateKey(new Date())}
         isLoggedIn={!!session}
+        isMember={isMember}
       />
     </div>
   );

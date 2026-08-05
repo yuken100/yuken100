@@ -18,6 +18,7 @@ type LessonFormValues = {
   gradientTo: string;
   thumbnailUrl: string;
   thumbnailPosition: string;
+  membersOnly: boolean;
   published: boolean;
 };
 
@@ -35,6 +36,7 @@ const defaultValues: LessonFormValues = {
   gradientTo: "#FFD2D9",
   thumbnailUrl: "",
   thumbnailPosition: "50% 50%",
+  membersOnly: false,
   published: true,
 };
 
@@ -260,14 +262,27 @@ export default function LessonForm({
         </Field>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-tiffany-800">
-        <input
-          type="checkbox"
-          checked={values.published}
-          onChange={(e) => update("published", e.target.checked)}
-        />
-        公開する
-      </label>
+      <div className="flex gap-6">
+        <label className="flex items-center gap-2 text-sm text-tiffany-800">
+          <input
+            type="checkbox"
+            checked={values.membersOnly}
+            onChange={(e) => update("membersOnly", e.target.checked)}
+          />
+          会員限定(非会員は予約不可)
+        </label>
+        <label className="flex items-center gap-2 text-sm text-tiffany-800">
+          <input
+            type="checkbox"
+            checked={values.published}
+            onChange={(e) => update("published", e.target.checked)}
+          />
+          公開する
+        </label>
+      </div>
+      <p className="text-xs text-tiffany-800/60">
+        有効な会員プランに加入している方は、価格や会員限定設定に関わらず決済不要で予約が確定します。「会員限定」をオンにすると、非会員はこのレッスンを予約できなくなります。
+      </p>
 
       {!lessonId && (
         <div className="rounded-xl2 border border-tiffany-100 bg-tiffany-50/50 p-5">

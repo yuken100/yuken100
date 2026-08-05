@@ -143,8 +143,10 @@ model Testimonial {
 }
 
 // Lesson booking system (Pro-plan feature) — Phase 1: manual slot creation,
-// pay-per-booking via Stripe. Recurring schedules, waitlists, ticket packs,
-// and subscription-included bookings are later phases.
+// pay-per-booking via Stripe. An active member skips payment entirely (same
+// bypass as video access); membersOnly additionally blocks non-members from
+// booking at all, regardless of price. Recurring schedules, waitlists, and
+// ticket packs are later phases.
 model Lesson {
   id                String       @id @default(cuid())
   slug              String       @unique
@@ -160,6 +162,7 @@ model Lesson {
   gradientTo        String       @default("#FFD2D9")
   thumbnailUrl      String?
   thumbnailPosition String       @default("50% 50%")
+  membersOnly       Boolean      @default(false)
   published         Boolean      @default(true)
   createdAt         DateTime     @default(now())
   slots             LessonSlot[]

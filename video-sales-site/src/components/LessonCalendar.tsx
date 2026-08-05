@@ -15,6 +15,7 @@ export type CalendarSlot = {
   capacity: number;
   full: boolean;
   priceJpy: number;
+  membersOnly: boolean;
   myStatus: "CONFIRMED" | "PENDING" | null;
 };
 
@@ -48,10 +49,12 @@ export default function LessonCalendar({
   slots,
   todayKey,
   isLoggedIn,
+  isMember,
 }: {
   slots: CalendarSlot[];
   todayKey: string;
   isLoggedIn: boolean;
+  isMember: boolean;
 }) {
   const [todayYear, todayMonth] = todayKey.split("-").map(Number);
   const [cursor, setCursor] = useState({ year: todayYear, month: todayMonth - 1 });
@@ -175,12 +178,19 @@ export default function LessonCalendar({
                       確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
                     </p>
                   </div>
+                ) : slot.membersOnly && !isMember ? (
+                  <div className="text-xs text-tiffany-800/60">
+                    <p className="font-semibold text-blush-300">会員限定のレッスンです</p>
+                    <Link href="/pricing" className="font-semibold text-tiffany-600 hover:text-tiffany-800">
+                      会員プランを見る →
+                    </Link>
+                  </div>
                 ) : slot.full ? (
                   <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-800/50">
                     満席
                   </span>
                 ) : (
-                  <BookSlotButton slotId={slot.id} priceJpy={slot.priceJpy} />
+                  <BookSlotButton slotId={slot.id} priceJpy={slot.priceJpy} isMember={isMember} />
                 )}
               </div>
             </div>

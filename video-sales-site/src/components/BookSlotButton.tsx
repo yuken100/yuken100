@@ -7,26 +7,32 @@ import PendingConfirmationNotice from "./PendingConfirmationNotice";
 export default function BookSlotButton({
   slotId,
   priceJpy,
+  isMember = false,
 }: {
   slotId: string;
   priceJpy: number;
+  isMember?: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
   const isFree = priceJpy === 0;
+  // Active members skip payment entirely regardless of price, via the same
+  // endpoint used for free lessons — the server decides confirmed vs pending.
+  const useFreeEndpoint = isFree || isMember;
 
   async function handleBook() {
     setError(null);
     setLoading(true);
     try {
       const res = await fetch(
-        isFree ? `/api/lessons/slots/${slotId}/book-free` : "/api/checkout/stripe",
+        useFreeEndpoint ? `/api/lessons/slots/${slotId}/book-free` : "/api/checkout/stripe",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: isFree ? undefined : JSON.stringify({ type: "lesson_slot", slotId }),
+          body: useFreeEndpoint ? undefined : JSON.stringify({ type: "lesson_slot", slotId }),
         }
       );
 
@@ -42,7 +48,13 @@ export default function BookSlotButton({
         return;
       }
 
-      if (isFree) {
+      if (data.confirmed) {
+        setConfirmed(true);
+        router.refresh();
+        return;
+      }
+
+      if (data.pending) {
         setPending(true);
         return;
       }
@@ -55,6 +67,14 @@ export default function BookSlotButton({
     } finally {
       setLoading(false);
     }
+  }
+
+  if (confirmed) {
+    return (
+      <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-700">
+        予約が完了しました
+      </span>
+    );
   }
 
   if (pending) {

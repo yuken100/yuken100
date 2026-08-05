@@ -21,6 +21,7 @@ const lessonSchema = z.object({
   gradientTo: z.string().min(1),
   thumbnailUrl: z.string().optional(),
   thumbnailPosition: z.string().optional(),
+  membersOnly: z.boolean(),
   published: z.boolean(),
 });
 

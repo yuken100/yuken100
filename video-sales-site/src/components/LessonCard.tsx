@@ -18,6 +18,7 @@ type LessonCardProps = {
   gradientTo: string;
   thumbnailUrl?: string | null;
   thumbnailPosition?: string | null;
+  membersOnly?: boolean;
 };
 
 export default function LessonCard(lesson: LessonCardProps) {
@@ -42,10 +43,15 @@ export default function LessonCard(lesson: LessonCardProps) {
         <h3 className="font-display text-base font-bold leading-snug text-tiffany-900 group-hover:text-tiffany-600">
           {lesson.title}
         </h3>
-        <div className="mt-auto pt-2">
+        <div className="mt-auto flex items-center justify-between pt-2">
           <span className="text-lg font-bold text-tiffany-700">
             ¥{lesson.priceJpy.toLocaleString()}
           </span>
+          {lesson.membersOnly && (
+            <span className="rounded-full bg-blush-100 px-3 py-1 text-xs font-semibold text-blush-300">
+              会員限定
+            </span>
+          )}
         </div>
       </div>
     </Link>

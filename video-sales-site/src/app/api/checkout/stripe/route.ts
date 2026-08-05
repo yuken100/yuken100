@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getReferringReseller, platformFeeJpy } from "@/lib/referral";
 import { isProPlan } from "@/lib/plan";
+import { hasActiveMembership } from "@/lib/access";
 import { formatJstDateTime } from "@/lib/datetime";
 
 const bodySchema = z.union([
@@ -126,6 +127,11 @@ export async function POST(request: Request) {
         );
       }
 
+      const isMember = await hasActiveMembership(session.user.id);
+      if (slot.lesson.membersOnly && !isMember) {
+        return NextResponse.json({ error: "このレッスンは会員限定です。" }, { status: 403 });
+      }
+
       const alreadyBooked = slot.bookings.some((booking) => booking.userId === session.user.id);
       if (alreadyBooked) {
         return NextResponse.json({ error: "この枠は既に予約済みです。" }, { status: 400 });
@@ -134,6 +140,23 @@ export async function POST(request: Request) {
       const capacity = slot.capacityOverride ?? slot.lesson.capacity;
       if (slot.bookings.length >= capacity) {
         return NextResponse.json({ error: "この枠は満席です。" }, { status: 400 });
+      }
+
+      // An active member skips Stripe entirely and books for free, same as
+      // the ¥0-lesson bypass in the book-free route.
+      if (isMember) {
+        await prisma.lessonBooking.upsert({
+          where: { userId_lessonSlotId: { userId: session.user.id, lessonSlotId: slot.id } },
+          create: {
+            userId: session.user.id,
+            lessonSlotId: slot.id,
+            status: "CONFIRMED",
+            amountJpy: 0,
+            provider: "membership",
+          },
+          update: { status: "CONFIRMED", amountJpy: 0, provider: "membership" },
+        });
+        return NextResponse.json({ ok: true, confirmed: true });
       }
 
       const checkoutSession = await stripe.checkout.sessions.create({
