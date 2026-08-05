@@ -57,7 +57,9 @@ export default function InstructorProfileForm({ initialValues }: { initialValues
           position={values.instructorPhotoPosition}
           onImageChange={(url) => update("instructorPhotoUrl", url)}
           onPositionChange={(position) => update("instructorPhotoPosition", position)}
-          previewClassName="h-20 w-20 rounded-full"
+          sizePreviews={[
+            { label: "ホームページでの見え方(目安: 400×400px)", className: "h-20 w-20 rounded-full" },
+          ]}
           buttonLabel="写真をアップロード"
         />
       </div>
