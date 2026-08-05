@@ -9,6 +9,7 @@ import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
 import CancelBookingButton from "@/components/CancelBookingButton";
 import ResellerPanel from "@/components/ResellerPanel";
+import PendingConfirmationNotice from "@/components/PendingConfirmationNotice";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -122,9 +123,12 @@ export default async function DashboardPage() {
                         ` ・ ${booking.lessonSlot.lesson.location}`}
                     </p>
                     {booking.status === "PENDING" && (
-                      <p className="mt-1 text-xs text-tiffany-800/70">
-                        メール内のリンクをクリックすると予約が完了します。
-                      </p>
+                      <div className="mt-2 max-w-sm space-y-2">
+                        <PendingConfirmationNotice />
+                        <p className="text-xs text-tiffany-800/70">
+                          メール内のリンクをクリックすると予約が完了します。
+                        </p>
+                      </div>
                     )}
                   </div>
                   {booking.status !== "CANCELLED" && (
