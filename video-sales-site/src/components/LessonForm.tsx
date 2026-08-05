@@ -233,7 +233,10 @@ export default function LessonForm({
           position={values.thumbnailPosition}
           onImageChange={(url) => update("thumbnailUrl", url)}
           onPositionChange={(position) => update("thumbnailPosition", position)}
-          previewClassName="h-24 w-full rounded-lg"
+          sizePreviews={[
+            { label: "レッスン一覧での見え方", className: "h-24 w-56 rounded-lg" },
+            { label: "詳細ページでの見え方", className: "h-36 w-80 rounded-lg" },
+          ]}
           buttonLabel="サムネイルをアップロード"
         />
       </Field>
