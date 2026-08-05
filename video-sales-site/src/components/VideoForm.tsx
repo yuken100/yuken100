@@ -170,8 +170,8 @@ export default function VideoForm({
           onImageChange={(url) => update("thumbnailUrl", url)}
           onPositionChange={(position) => update("thumbnailPosition", position)}
           sizePreviews={[
-            { label: "講座一覧での見え方", className: "h-24 w-56 rounded-lg" },
-            { label: "詳細ページでの見え方", className: "h-36 w-80 rounded-lg" },
+            { label: "講座一覧での見え方(目安: 800×360px)", className: "h-24 w-56 rounded-lg" },
+            { label: "詳細ページでの見え方(目安: 960×540px)", className: "h-36 w-80 rounded-lg" },
           ]}
           buttonLabel="サムネイルをアップロード"
         />
