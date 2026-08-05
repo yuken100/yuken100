@@ -55,6 +55,7 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
             from={lesson.gradientFrom}
             to={lesson.gradientTo}
             level={formatLabel[lesson.format] ?? lesson.format}
+            imageUrl={lesson.thumbnailUrl}
             className="h-64 w-full md:h-80"
           />
 

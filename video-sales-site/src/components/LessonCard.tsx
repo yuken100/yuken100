@@ -16,6 +16,7 @@ type LessonCardProps = {
   capacity: number;
   gradientFrom: string;
   gradientTo: string;
+  thumbnailUrl?: string | null;
 };
 
 export default function LessonCard(lesson: LessonCardProps) {
@@ -28,6 +29,7 @@ export default function LessonCard(lesson: LessonCardProps) {
         from={lesson.gradientFrom}
         to={lesson.gradientTo}
         level={formatLabel[lesson.format] ?? lesson.format}
+        imageUrl={lesson.thumbnailUrl}
         className="h-40 w-full"
       />
       <div className="flex flex-1 flex-col gap-2 p-5">

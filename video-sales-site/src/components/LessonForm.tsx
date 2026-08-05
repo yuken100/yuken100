@@ -15,6 +15,7 @@ type LessonFormValues = {
   priceJpy: number;
   gradientFrom: string;
   gradientTo: string;
+  thumbnailUrl: string;
   published: boolean;
 };
 
@@ -30,6 +31,7 @@ const defaultValues: LessonFormValues = {
   priceJpy: 3300,
   gradientFrom: "#81D8D0",
   gradientTo: "#FFD2D9",
+  thumbnailUrl: "",
   published: true,
 };
 
@@ -48,6 +50,7 @@ export default function LessonForm({
     ...initialValues,
     location: initialValues?.location ?? "",
     onlineUrl: initialValues?.onlineUrl ?? "",
+    thumbnailUrl: initialValues?.thumbnailUrl ?? "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -219,8 +222,17 @@ export default function LessonForm({
         />
       </Field>
 
+      <Field label="サムネイル画像URL(任意・空欄の場合は下のグラデーションを表示)">
+        <input
+          value={values.thumbnailUrl}
+          onChange={(e) => update("thumbnailUrl", e.target.value)}
+          className="input"
+          placeholder="例: https://example.com/thumbnail.jpg"
+        />
+      </Field>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="サムネイル グラデーション色1">
+        <Field label="サムネイル グラデーション色1(画像未設定時に使用)">
           <input
             type="color"
             value={values.gradientFrom}
@@ -228,7 +240,7 @@ export default function LessonForm({
             className="h-10 w-full"
           />
         </Field>
-        <Field label="サムネイル グラデーション色2">
+        <Field label="サムネイル グラデーション色2(画像未設定時に使用)">
           <input
             type="color"
             value={values.gradientTo}

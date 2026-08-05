@@ -58,6 +58,7 @@ model Video {
   priceJpy        Int
   gradientFrom    String     @default("#81D8D0")
   gradientTo      String     @default("#FFD2D9")
+  thumbnailUrl    String?
   videoUrl        String
   previewUrl      String?
   membersOnly     Boolean    @default(false)
@@ -116,10 +117,26 @@ model Subscription {
 // Single-row table controlling which paid tier of the product this
 // deployment is licensed at ("BASIC" | "PRO"). Lets the same codebase be
 // delivered to different clients with features gated behind a plan, without
-// a redeploy — see src/lib/plan.ts.
+// a redeploy — see src/lib/plan.ts. Also carries the homepage instructor
+// profile, shown only once instructorName is set.
 model SiteSettings {
-  id   String @id @default("singleton")
-  plan String @default("PRO")
+  id                 String  @id @default("singleton")
+  plan               String  @default("PRO")
+  instructorName     String?
+  instructorBio      String?
+  instructorPhotoUrl String?
+}
+
+// Homepage social-proof section — only published testimonials are shown,
+// and the section itself is hidden entirely if there are none yet.
+model Testimonial {
+  id          String   @id @default(cuid())
+  studentName String
+  comment     String
+  photoUrl    String?
+  rating      Int?
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
 }
 
 // Lesson booking system (Pro-plan feature) — Phase 1: manual slot creation,
@@ -138,6 +155,7 @@ model Lesson {
   priceJpy        Int
   gradientFrom    String       @default("#81D8D0")
   gradientTo      String       @default("#FFD2D9")
+  thumbnailUrl    String?
   published       Boolean      @default(true)
   createdAt       DateTime     @default(now())
   slots           LessonSlot[]

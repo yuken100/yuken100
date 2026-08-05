@@ -14,6 +14,7 @@ type VideoFormValues = {
   videoUrl: string;
   gradientFrom: string;
   gradientTo: string;
+  thumbnailUrl: string;
   membersOnly: boolean;
   published: boolean;
 };
@@ -29,6 +30,7 @@ const defaultValues: VideoFormValues = {
   videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
   gradientFrom: "#81D8D0",
   gradientTo: "#FFD2D9",
+  thumbnailUrl: "",
   membersOnly: false,
   published: true,
 };
@@ -157,8 +159,17 @@ export default function VideoForm({
         </Field>
       </div>
 
+      <Field label="サムネイル画像URL(任意・空欄の場合は下のグラデーションを表示)">
+        <input
+          value={values.thumbnailUrl}
+          onChange={(e) => update("thumbnailUrl", e.target.value)}
+          className="input"
+          placeholder="例: https://example.com/thumbnail.jpg"
+        />
+      </Field>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="サムネイル グラデーション色1">
+        <Field label="サムネイル グラデーション色1(画像未設定時に使用)">
           <input
             type="color"
             value={values.gradientFrom}
@@ -166,7 +177,7 @@ export default function VideoForm({
             className="h-10 w-full"
           />
         </Field>
-        <Field label="サムネイル グラデーション色2">
+        <Field label="サムネイル グラデーション色2(画像未設定時に使用)">
           <input
             type="color"
             value={values.gradientTo}
