@@ -32,6 +32,16 @@ export default function ImageUploadField({
 
   return (
     <div>
+      {!imageUrl && sizePreviews && (
+        <div className="mb-3 rounded-lg bg-tiffany-50 px-3 py-2">
+          <p className="text-xs font-semibold text-tiffany-800">推奨サイズの目安</p>
+          <ul className="mt-1 space-y-0.5 text-xs text-tiffany-800/70">
+            {sizePreviews.map((preview) => (
+              <li key={preview.label}>・{preview.label}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       {imageUrl && (
         <div className="mb-3">
           {sizePreviews ? (
