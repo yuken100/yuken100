@@ -7,6 +7,8 @@ function parsePosition(position: string): { x: number; y: number } {
   return { x: Number.isFinite(x) ? x : 50, y: Number.isFinite(y) ? y : 50 };
 }
 
+type SizePreview = { label: string; className: string };
+
 export default function ImageUploadField({
   folder,
   imageUrl,
@@ -14,6 +16,7 @@ export default function ImageUploadField({
   onImageChange,
   onPositionChange,
   previewClassName = "h-24 w-full rounded-lg",
+  sizePreviews,
   buttonLabel = "画像をアップロード",
 }: {
   folder: string;
@@ -22,6 +25,7 @@ export default function ImageUploadField({
   onImageChange: (url: string) => void;
   onPositionChange: (position: string) => void;
   previewClassName?: string;
+  sizePreviews?: SizePreview[];
   buttonLabel?: string;
 }) {
   const { x, y } = parsePosition(position);
@@ -30,13 +34,30 @@ export default function ImageUploadField({
     <div>
       {imageUrl && (
         <div className="mb-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={imageUrl}
-            alt="Preview"
-            className={`${previewClassName} object-cover`}
-            style={{ objectPosition: position }}
-          />
+          {sizePreviews ? (
+            <div className="flex flex-wrap gap-4">
+              {sizePreviews.map((preview) => (
+                <div key={preview.label}>
+                  <p className="mb-1 text-xs font-medium text-tiffany-800/70">{preview.label}</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt={preview.label}
+                    className={`${preview.className} object-cover`}
+                    style={{ objectPosition: position }}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt="Preview"
+              className={`${previewClassName} object-cover`}
+              style={{ objectPosition: position }}
+            />
+          )}
           <div className="mt-2 space-y-1">
             <label className="flex items-center gap-2 text-xs text-tiffany-800/70">
               横位置
