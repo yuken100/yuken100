@@ -53,7 +53,10 @@ export default async function AdminTestimonialsPage() {
                 </td>
                 <td className="px-4 py-3 text-tiffany-800/70">
                   {testimonial.user ? (
-                    <span title={testimonial.user.email}>{testimonial.user.name}(受講生投稿)</span>
+                    <span title={testimonial.user.email}>
+                      {testimonial.user.name}(受講生投稿・掲載
+                      {testimonial.consentToPublish ? "同意あり" : "同意なし"})
+                    </span>
                   ) : (
                     "管理者"
                   )}

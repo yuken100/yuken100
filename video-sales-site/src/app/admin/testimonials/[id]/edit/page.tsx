@@ -29,6 +29,7 @@ export default async function EditTestimonialPage({ params }: { params: { id: st
           videoId={testimonial.videoId}
           lessonId={testimonial.lessonId}
           published={testimonial.published}
+          consentToPublish={testimonial.consentToPublish}
         />
       </div>
     );

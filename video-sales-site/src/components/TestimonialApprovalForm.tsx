@@ -13,6 +13,7 @@ export default function TestimonialApprovalForm({
   videoId,
   lessonId,
   published: initialPublished,
+  consentToPublish,
 }: {
   testimonialId: string;
   studentName: string;
@@ -23,6 +24,7 @@ export default function TestimonialApprovalForm({
   videoId: string | null;
   lessonId: string | null;
   published: boolean;
+  consentToPublish: boolean;
 }) {
   const router = useRouter();
   const [published, setPublished] = useState(initialPublished);
@@ -82,14 +84,25 @@ export default function TestimonialApprovalForm({
         </p>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-tiffany-800">
-        <input
-          type="checkbox"
-          checked={published}
-          onChange={(e) => setPublished(e.target.checked)}
-        />
-        公開する
-      </label>
+      {consentToPublish ? (
+        <label className="flex items-center gap-2 text-sm text-tiffany-800">
+          <input
+            type="checkbox"
+            checked={published}
+            onChange={(e) => setPublished(e.target.checked)}
+          />
+          公開する
+        </label>
+      ) : (
+        <div className="rounded-lg border border-blush-200 bg-blush-50 px-3 py-2">
+          <p className="text-xs font-semibold text-blush-300">
+            投稿者はサイトへの掲載に同意していないため、公開できません
+          </p>
+          <p className="mt-1 text-xs text-tiffany-800/60">
+            サービス改善の参考として社内で確認するのみとなります。
+          </p>
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
