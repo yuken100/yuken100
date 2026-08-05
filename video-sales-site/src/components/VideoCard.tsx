@@ -12,6 +12,7 @@ type VideoCardProps = {
   gradientFrom: string;
   gradientTo: string;
   thumbnailUrl?: string | null;
+  thumbnailPosition?: string | null;
 };
 
 export default function VideoCard(video: VideoCardProps) {
@@ -25,6 +26,7 @@ export default function VideoCard(video: VideoCardProps) {
         to={video.gradientTo}
         level={video.level}
         imageUrl={video.thumbnailUrl}
+        imagePosition={video.thumbnailPosition}
         className="h-40 w-full"
       />
       <div className="flex flex-1 flex-col gap-2 p-5">

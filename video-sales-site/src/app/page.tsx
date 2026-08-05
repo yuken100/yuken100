@@ -106,6 +106,7 @@ export default async function HomePage() {
                 src={settings.instructorPhotoUrl}
                 alt={settings.instructorName}
                 className="h-32 w-32 shrink-0 rounded-full object-cover shadow-soft"
+                style={{ objectPosition: settings.instructorPhotoPosition ?? "50% 50%" }}
               />
             ) : (
               <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-tiffany-200 text-3xl font-bold text-white shadow-soft">
@@ -145,6 +146,7 @@ export default async function HomePage() {
                         src={testimonial.photoUrl}
                         alt={testimonial.studentName}
                         className="h-10 w-10 rounded-full object-cover"
+                        style={{ objectPosition: testimonial.photoPosition ?? "50% 50%" }}
                       />
                     ) : (
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-tiffany-200 text-sm font-bold text-white">
