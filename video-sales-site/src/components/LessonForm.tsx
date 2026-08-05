@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import CloudinaryUpload from "./CloudinaryUpload";
 
 type LessonFormValues = {
   title: string;
@@ -222,13 +223,21 @@ export default function LessonForm({
         />
       </Field>
 
-      <Field label="サムネイル画像URL(任意・空欄の場合は下のグラデーションを表示)">
-        <input
-          value={values.thumbnailUrl}
-          onChange={(e) => update("thumbnailUrl", e.target.value)}
-          className="input"
-          placeholder="例: https://example.com/thumbnail.jpg"
-        />
+      <Field label="サムネイル画像(任意・空欄の場合は下のグラデーションを表示)">
+        {values.thumbnailUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={values.thumbnailUrl}
+            alt="Thumbnail Preview"
+            className="mb-3 h-24 w-full rounded-lg object-cover"
+          />
+        )}
+        <CloudinaryUpload
+          folder="yoga-studio/lessons"
+          onUpload={(url) => update("thumbnailUrl", url)}
+        >
+          サムネイルをアップロード
+        </CloudinaryUpload>
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
