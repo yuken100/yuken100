@@ -7,7 +7,7 @@ import { isProPlan } from "@/lib/plan";
 import { formatJstDateTime } from "@/lib/datetime";
 import { sendLessonBookingConfirmationEmail } from "@/lib/email";
 
-const CONFIRMATION_TTL_MS = 24 * 60 * 60 * 1000;
+const CONFIRMATION_TTL_MS = 10 * 60 * 1000;
 
 // Bookings that still count toward capacity: confirmed ones, plus pending
 // ones whose confirmation link hasn't been used or expired yet. An expired

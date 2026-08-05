@@ -60,6 +60,9 @@ export default function BookSlotButton({
     return (
       <div className="max-w-xs space-y-1">
         <p className="text-sm font-bold text-red-500">まだ予約は完了していません</p>
+        <p className="text-sm font-bold text-red-500">
+          10分以内にメール内のリンクをクリックしないと、この予約は自動的に無効になります
+        </p>
         <p className="text-xs text-tiffany-800/70">
           ご登録のメールアドレスに予約確認メールをお送りしました。メール内のリンクをクリックすると予約が完了します。
         </p>
