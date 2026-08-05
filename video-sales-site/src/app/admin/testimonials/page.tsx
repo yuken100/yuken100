@@ -10,7 +10,11 @@ export default async function AdminTestimonialsPage() {
 
   const testimonials = await prisma.testimonial.findMany({
     orderBy: { createdAt: "desc" },
-    include: { video: { select: { title: true } }, lesson: { select: { title: true } } },
+    include: {
+      video: { select: { title: true } },
+      lesson: { select: { title: true } },
+      user: { select: { name: true, email: true } },
+    },
   });
 
   return (
@@ -31,6 +35,7 @@ export default async function AdminTestimonialsPage() {
             <tr>
               <th className="px-4 py-3">お名前</th>
               <th className="px-4 py-3">コメント</th>
+              <th className="px-4 py-3">投稿者</th>
               <th className="px-4 py-3">表示先</th>
               <th className="px-4 py-3">評価</th>
               <th className="px-4 py-3">公開</th>
@@ -45,6 +50,13 @@ export default async function AdminTestimonialsPage() {
                 </td>
                 <td className="max-w-sm truncate px-4 py-3 text-tiffany-800/70">
                   {testimonial.comment}
+                </td>
+                <td className="px-4 py-3 text-tiffany-800/70">
+                  {testimonial.user ? (
+                    <span title={testimonial.user.email}>{testimonial.user.name}(受講生投稿)</span>
+                  ) : (
+                    "管理者"
+                  )}
                 </td>
                 <td className="px-4 py-3 text-tiffany-800/70">
                   {testimonial.video?.title ?? testimonial.lesson?.title ?? "トップページ"}
@@ -68,7 +80,7 @@ export default async function AdminTestimonialsPage() {
             ))}
             {testimonials.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-tiffany-800/60">
+                <td colSpan={7} className="px-4 py-8 text-center text-tiffany-800/60">
                   まだ口コミがありません。
                 </td>
               </tr>

@@ -10,6 +10,7 @@ import VideoThumb from "@/components/VideoThumb";
 import BookSlotButton from "@/components/BookSlotButton";
 import PendingConfirmationNotice from "@/components/PendingConfirmationNotice";
 import TestimonialSection from "@/components/TestimonialSection";
+import TestimonialSubmitForm from "@/components/TestimonialSubmitForm";
 
 const formatLabel: Record<string, string> = {
   ONLINE: "オンライン",
@@ -51,6 +52,17 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
     where: { published: true, lessonId: lesson.id },
     orderBy: { createdAt: "desc" },
   });
+  const myBookingConfirmed = session
+    ? await prisma.lessonBooking.findFirst({
+        where: { userId: session.user.id, status: "CONFIRMED", lessonSlot: { lessonId: lesson.id } },
+      })
+    : null;
+  const canReview = Boolean(myBookingConfirmed);
+  const myTestimonial = canReview
+    ? await prisma.testimonial.findFirst({
+        where: { userId: session!.user.id, lessonId: lesson.id },
+      })
+    : null;
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -164,6 +176,20 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
           </div>
         </div>
       </div>
+
+      {canReview && (
+        <div className="mt-10 max-w-2xl">
+          {myTestimonial ? (
+            <div className="rounded-xl2 border border-tiffany-100 bg-white p-6 text-sm text-tiffany-800/70 shadow-sm">
+              {myTestimonial.published
+                ? "あなたが投稿した口コミは公開されています。"
+                : "口コミを投稿済みです。確認後に掲載されます。"}
+            </div>
+          ) : (
+            <TestimonialSubmitForm lessonId={lesson.id} defaultName={session?.user.name ?? undefined} />
+          )}
+        </div>
+      )}
 
       <TestimonialSection testimonials={testimonials} title="このレッスンを受けた生徒さんの声" />
     </div>
