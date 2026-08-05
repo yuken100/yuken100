@@ -20,12 +20,12 @@ export default async function AdminTestimonialsPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-3xl font-bold text-tiffany-900">口コミ管理</h1>
+        <h1 className="font-display text-3xl font-bold text-tiffany-900">ご感想管理</h1>
         <Link
           href="/admin/testimonials/new"
           className="rounded-full bg-tiffany-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-tiffany-600"
         >
-          + 新しい口コミを追加
+          + 新しいご感想を追加
         </Link>
       </div>
 
@@ -81,7 +81,7 @@ export default async function AdminTestimonialsPage() {
             {testimonials.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-tiffany-800/60">
-                  まだ口コミがありません。
+                  まだご感想がありません。
                 </td>
               </tr>
             )}
