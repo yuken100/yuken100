@@ -1,7 +1,6 @@
 "use client";
 
-import { CldUploadWidget } from "next-cloudinary";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface CloudinaryUploadProps {
   onUpload: (url: string) => void;
@@ -14,47 +13,65 @@ export default function CloudinaryUpload({
   folder = "yoga-studio",
   children,
 }: CloudinaryUploadProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignRequest = async (callback: (arg0: any) => void) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+
     try {
-      const response = await fetch("/api/cloudinary/sign", {
-        method: "POST",
-        body: JSON.stringify({ folder }),
-      });
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "yoga_studio_unsigned");
+      formData.append("folder", folder);
+      formData.append("cloud_name", process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "");
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
       const data = await response.json();
-      callback(data);
+
+      if (data.secure_url) {
+        onUpload(data.secure_url);
+      } else {
+        console.error("Upload failed:", data);
+      }
     } catch (error) {
-      console.error("Signature request failed:", error);
+      console.error("Upload error:", error);
+    } finally {
+      setIsLoading(false);
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
     }
   };
 
   return (
-    <CldUploadWidget
-      signatureEndpoint="/api/cloudinary/sign"
-      uploadPreset={undefined}
-      options={{
-        folder,
-      }}
-      onSuccess={(result: any) => {
-        setIsLoading(false);
-        onUpload(result.info.secure_url);
-      }}
-      onError={() => {
-        setIsLoading(false);
-      }}
-      onOpen={() => setIsLoading(true)}
-    >
-      {({ open }) => (
-        <button
-          type="button"
-          onClick={() => open()}
-          disabled={isLoading}
-          className="inline-flex items-center gap-2 rounded-full border border-tiffany-300 bg-white px-4 py-2 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50 disabled:opacity-50"
-        >
-          {isLoading ? "アップロード中..." : children || "画像を選択"}
-        </button>
-      )}
-    </CldUploadWidget>
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        disabled={isLoading}
+        className="hidden"
+      />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={isLoading}
+        className="inline-flex items-center gap-2 rounded-full border border-tiffany-300 bg-white px-4 py-2 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50 disabled:opacity-50"
+      >
+        {isLoading ? "アップロード中..." : children || "画像を選択"}
+      </button>
+    </>
   );
 }
