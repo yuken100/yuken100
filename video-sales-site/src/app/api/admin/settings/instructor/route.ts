@@ -7,6 +7,7 @@ const schema = z.object({
   instructorName: z.string(),
   instructorBio: z.string(),
   instructorPhotoUrl: z.string(),
+  instructorPhotoPosition: z.string().optional(),
 });
 
 export async function PUT(request: Request) {

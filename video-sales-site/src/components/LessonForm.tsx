@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import CloudinaryUpload from "./CloudinaryUpload";
+import ImageUploadField from "./ImageUploadField";
 
 type LessonFormValues = {
   title: string;
@@ -17,6 +17,7 @@ type LessonFormValues = {
   gradientFrom: string;
   gradientTo: string;
   thumbnailUrl: string;
+  thumbnailPosition: string;
   published: boolean;
 };
 
@@ -33,6 +34,7 @@ const defaultValues: LessonFormValues = {
   gradientFrom: "#81D8D0",
   gradientTo: "#FFD2D9",
   thumbnailUrl: "",
+  thumbnailPosition: "50% 50%",
   published: true,
 };
 
@@ -52,6 +54,7 @@ export default function LessonForm({
     location: initialValues?.location ?? "",
     onlineUrl: initialValues?.onlineUrl ?? "",
     thumbnailUrl: initialValues?.thumbnailUrl ?? "",
+    thumbnailPosition: initialValues?.thumbnailPosition ?? "50% 50%",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -224,20 +227,15 @@ export default function LessonForm({
       </Field>
 
       <Field label="サムネイル画像(任意・空欄の場合は下のグラデーションを表示)">
-        {values.thumbnailUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={values.thumbnailUrl}
-            alt="Thumbnail Preview"
-            className="mb-3 h-24 w-full rounded-lg object-cover"
-          />
-        )}
-        <CloudinaryUpload
+        <ImageUploadField
           folder="yoga-studio/lessons"
-          onUpload={(url) => update("thumbnailUrl", url)}
-        >
-          サムネイルをアップロード
-        </CloudinaryUpload>
+          imageUrl={values.thumbnailUrl}
+          position={values.thumbnailPosition}
+          onImageChange={(url) => update("thumbnailUrl", url)}
+          onPositionChange={(position) => update("thumbnailPosition", position)}
+          previewClassName="h-24 w-full rounded-lg"
+          buttonLabel="サムネイルをアップロード"
+        />
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

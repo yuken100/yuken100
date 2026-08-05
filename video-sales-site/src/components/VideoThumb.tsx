@@ -4,12 +4,14 @@ export default function VideoThumb({
   level,
   className = "",
   imageUrl,
+  imagePosition,
 }: {
   from: string;
   to: string;
   level: string;
   className?: string;
   imageUrl?: string | null;
+  imagePosition?: string | null;
 }) {
   return (
     <div
@@ -18,7 +20,12 @@ export default function VideoThumb({
     >
       {imageUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={imageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: imagePosition ?? "50% 50%" }}
+        />
       )}
       <span className="absolute left-3 top-3 z-10 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-tiffany-800">
         {level}

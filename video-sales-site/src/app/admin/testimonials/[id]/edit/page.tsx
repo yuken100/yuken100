@@ -19,6 +19,7 @@ export default async function EditTestimonialPage({ params }: { params: { id: st
           studentName: testimonial.studentName,
           comment: testimonial.comment,
           photoUrl: testimonial.photoUrl ?? "",
+          photoPosition: testimonial.photoPosition ?? "50% 50%",
           rating: testimonial.rating ? String(testimonial.rating) : "",
           published: testimonial.published,
         }}

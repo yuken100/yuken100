@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import CloudinaryUpload from "./CloudinaryUpload";
+import ImageUploadField from "./ImageUploadField";
 
 type TestimonialFormValues = {
   studentName: string;
   comment: string;
   photoUrl: string;
+  photoPosition: string;
   rating: string;
   published: boolean;
 };
@@ -16,6 +17,7 @@ const defaultValues: TestimonialFormValues = {
   studentName: "",
   comment: "",
   photoUrl: "",
+  photoPosition: "50% 50%",
   rating: "",
   published: true,
 };
@@ -54,6 +56,7 @@ export default function TestimonialForm({
         studentName: values.studentName,
         comment: values.comment,
         photoUrl: values.photoUrl,
+        photoPosition: values.photoPosition,
         rating: values.rating ? Number(values.rating) : null,
         published: values.published,
       }),
@@ -94,20 +97,15 @@ export default function TestimonialForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="写真(任意)">
-          {values.photoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={values.photoUrl}
-              alt="Preview"
-              className="mb-3 h-16 w-16 rounded-full object-cover"
-            />
-          )}
-          <CloudinaryUpload
+          <ImageUploadField
             folder="yoga-studio/testimonials"
-            onUpload={(url) => update("photoUrl", url)}
-          >
-            写真をアップロード
-          </CloudinaryUpload>
+            imageUrl={values.photoUrl}
+            position={values.photoPosition}
+            onImageChange={(url) => update("photoUrl", url)}
+            onPositionChange={(position) => update("photoPosition", position)}
+            previewClassName="h-16 w-16 rounded-full"
+            buttonLabel="写真をアップロード"
+          />
         </Field>
         <Field label="評価(任意・1〜5)">
           <input

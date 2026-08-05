@@ -20,6 +20,7 @@ const lessonSchema = z.object({
   gradientFrom: z.string().min(1),
   gradientTo: z.string().min(1),
   thumbnailUrl: z.string().optional(),
+  thumbnailPosition: z.string().optional(),
   published: z.boolean(),
 });
 

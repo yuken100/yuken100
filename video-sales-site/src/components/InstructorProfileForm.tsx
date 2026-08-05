@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import CloudinaryUpload from "./CloudinaryUpload";
+import ImageUploadField from "./ImageUploadField";
 
 type Values = {
   instructorName: string;
   instructorBio: string;
   instructorPhotoUrl: string;
+  instructorPhotoPosition: string;
 };
 
 export default function InstructorProfileForm({ initialValues }: { initialValues: Values }) {
@@ -50,20 +51,15 @@ export default function InstructorProfileForm({ initialValues }: { initialValues
       </label>
       <div className="block text-sm font-medium text-tiffany-800">
         <p className="mb-2">プロフィール写真</p>
-        {values.instructorPhotoUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={values.instructorPhotoUrl}
-            alt="Preview"
-            className="mb-3 h-20 w-20 rounded-full object-cover"
-          />
-        )}
-        <CloudinaryUpload
+        <ImageUploadField
           folder="yoga-studio/instructor"
-          onUpload={(url) => update("instructorPhotoUrl", url)}
-        >
-          写真をアップロード
-        </CloudinaryUpload>
+          imageUrl={values.instructorPhotoUrl}
+          position={values.instructorPhotoPosition}
+          onImageChange={(url) => update("instructorPhotoUrl", url)}
+          onPositionChange={(position) => update("instructorPhotoPosition", position)}
+          previewClassName="h-20 w-20 rounded-full"
+          buttonLabel="写真をアップロード"
+        />
       </div>
       <label className="block text-sm font-medium text-tiffany-800">
         自己紹介文

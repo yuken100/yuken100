@@ -48,23 +48,24 @@ model PasswordResetToken {
 }
 
 model Video {
-  id              String     @id @default(cuid())
-  slug            String     @unique
-  title           String
-  description     String
-  category        String
-  level           String
-  durationMinutes Int
-  priceJpy        Int
-  gradientFrom    String     @default("#81D8D0")
-  gradientTo      String     @default("#FFD2D9")
-  thumbnailUrl    String?
-  videoUrl        String
-  previewUrl      String?
-  membersOnly     Boolean    @default(false)
-  published       Boolean    @default(true)
-  createdAt       DateTime   @default(now())
-  purchases       Purchase[]
+  id                String     @id @default(cuid())
+  slug              String     @unique
+  title             String
+  description       String
+  category          String
+  level             String
+  durationMinutes   Int
+  priceJpy          Int
+  gradientFrom      String     @default("#81D8D0")
+  gradientTo        String     @default("#FFD2D9")
+  thumbnailUrl      String?
+  thumbnailPosition String     @default("50% 50%")
+  videoUrl          String
+  previewUrl        String?
+  membersOnly       Boolean    @default(false)
+  published         Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  purchases         Purchase[]
 }
 
 model Plan {
@@ -120,45 +121,48 @@ model Subscription {
 // a redeploy — see src/lib/plan.ts. Also carries the homepage instructor
 // profile, shown only once instructorName is set.
 model SiteSettings {
-  id                 String  @id @default("singleton")
-  plan               String  @default("PRO")
-  instructorName     String?
-  instructorBio      String?
-  instructorPhotoUrl String?
+  id                      String  @id @default("singleton")
+  plan                    String  @default("PRO")
+  instructorName          String?
+  instructorBio           String?
+  instructorPhotoUrl      String?
+  instructorPhotoPosition String  @default("50% 50%")
 }
 
 // Homepage social-proof section — only published testimonials are shown,
 // and the section itself is hidden entirely if there are none yet.
 model Testimonial {
-  id          String   @id @default(cuid())
-  studentName String
-  comment     String
-  photoUrl    String?
-  rating      Int?
-  published   Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  studentName   String
+  comment       String
+  photoUrl      String?
+  photoPosition String   @default("50% 50%")
+  rating        Int?
+  published     Boolean  @default(true)
+  createdAt     DateTime @default(now())
 }
 
 // Lesson booking system (Pro-plan feature) — Phase 1: manual slot creation,
 // pay-per-booking via Stripe. Recurring schedules, waitlists, ticket packs,
 // and subscription-included bookings are later phases.
 model Lesson {
-  id              String       @id @default(cuid())
-  slug            String       @unique
-  title           String
-  description     String
-  format          String // ONLINE | OFFLINE | HYBRID
-  location        String?
-  onlineUrl       String?
-  durationMinutes Int
-  capacity        Int
-  priceJpy        Int
-  gradientFrom    String       @default("#81D8D0")
-  gradientTo      String       @default("#FFD2D9")
-  thumbnailUrl    String?
-  published       Boolean      @default(true)
-  createdAt       DateTime     @default(now())
-  slots           LessonSlot[]
+  id                String       @id @default(cuid())
+  slug              String       @unique
+  title             String
+  description       String
+  format            String // ONLINE | OFFLINE | HYBRID
+  location          String?
+  onlineUrl         String?
+  durationMinutes   Int
+  capacity          Int
+  priceJpy          Int
+  gradientFrom      String       @default("#81D8D0")
+  gradientTo        String       @default("#FFD2D9")
+  thumbnailUrl      String?
+  thumbnailPosition String       @default("50% 50%")
+  published         Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  slots             LessonSlot[]
 }
 
 model LessonSlot {

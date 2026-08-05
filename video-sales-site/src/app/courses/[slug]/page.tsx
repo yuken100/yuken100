@@ -34,6 +34,7 @@ export default async function CourseDetailPage({
             to={video.gradientTo}
             level={video.level}
             imageUrl={video.thumbnailUrl}
+            imagePosition={video.thumbnailPosition}
             className="h-64 w-full md:h-80"
           />
 

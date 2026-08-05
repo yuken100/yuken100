@@ -36,6 +36,7 @@ export default async function AdminSettingsPage() {
             instructorName: settings?.instructorName ?? "",
             instructorBio: settings?.instructorBio ?? "",
             instructorPhotoUrl: settings?.instructorPhotoUrl ?? "",
+            instructorPhotoPosition: settings?.instructorPhotoPosition ?? "50% 50%",
           }}
         />
       </section>
