@@ -5,11 +5,19 @@ import VideoCard from "@/components/VideoCard";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const videos = await prisma.video.findMany({
-    where: { published: true },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+  const [videos, settings, testimonials] = await Promise.all([
+    prisma.video.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    }),
+    prisma.siteSettings.findUnique({ where: { id: "singleton" } }),
+    prisma.testimonial.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    }),
+  ]);
 
   return (
     <div>
@@ -88,6 +96,82 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {settings?.instructorName && (
+        <section className="mx-auto max-w-4xl px-6 py-16">
+          <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
+            {settings.instructorPhotoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={settings.instructorPhotoUrl}
+                alt={settings.instructorName}
+                className="h-32 w-32 shrink-0 rounded-full object-cover shadow-soft"
+              />
+            ) : (
+              <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-tiffany-200 text-3xl font-bold text-white shadow-soft">
+                {settings.instructorName.charAt(0)}
+              </div>
+            )}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-tiffany-600">
+                講師紹介
+              </p>
+              <h2 className="mt-1 font-display text-2xl font-bold text-tiffany-900">
+                {settings.instructorName}
+              </h2>
+              {settings.instructorBio && (
+                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-tiffany-800/80">
+                  {settings.instructorBio}
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {testimonials.length > 0 && (
+        <section className="bg-tiffany-50">
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <h2 className="text-center font-display text-2xl font-bold text-tiffany-900">
+              生徒さんの声
+            </h2>
+            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {testimonials.map((testimonial) => (
+                <div key={testimonial.id} className="rounded-xl2 bg-white p-6 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    {testimonial.photoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={testimonial.photoUrl}
+                        alt={testimonial.studentName}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-tiffany-200 text-sm font-bold text-white">
+                        {testimonial.studentName.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-semibold text-tiffany-900">
+                        {testimonial.studentName}
+                      </p>
+                      {testimonial.rating && (
+                        <p className="text-xs text-tiffany-500" aria-label={`評価${testimonial.rating}`}>
+                          {"★".repeat(testimonial.rating)}
+                          {"☆".repeat(5 - testimonial.rating)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-tiffany-800/80">
+                    {testimonial.comment}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-4xl px-6 py-20 text-center">
         <h2 className="font-display text-2xl font-bold text-tiffany-900">

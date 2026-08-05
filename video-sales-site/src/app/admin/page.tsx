@@ -45,6 +45,12 @@ export default async function AdminPage() {
             販売代理店を管理
           </Link>
           <Link
+            href="/admin/testimonials"
+            className="rounded-full border border-tiffany-300 px-5 py-2.5 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
+          >
+            口コミを管理
+          </Link>
+          <Link
             href="/admin/videos/new"
             className="rounded-full bg-tiffany-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-tiffany-600"
           >

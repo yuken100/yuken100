@@ -13,7 +13,10 @@ export default async function EditVideoPage({ params }: { params: { id: string }
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="font-display text-2xl font-bold text-tiffany-900">動画を編集</h1>
-      <VideoForm videoId={video.id} initialValues={video} />
+      <VideoForm
+        videoId={video.id}
+        initialValues={{ ...video, thumbnailUrl: video.thumbnailUrl ?? "" }}
+      />
     </div>
   );
 }

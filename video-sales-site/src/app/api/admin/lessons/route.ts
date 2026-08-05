@@ -19,6 +19,7 @@ const lessonSchema = z.object({
   priceJpy: z.number().int().nonnegative(),
   gradientFrom: z.string().min(1),
   gradientTo: z.string().min(1),
+  thumbnailUrl: z.string().optional(),
   published: z.boolean(),
 });
 

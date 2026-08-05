@@ -22,6 +22,7 @@ export default async function EditLessonPage({ params }: { params: { id: string 
           format: lesson.format as "ONLINE" | "OFFLINE" | "HYBRID",
           location: lesson.location ?? "",
           onlineUrl: lesson.onlineUrl ?? "",
+          thumbnailUrl: lesson.thumbnailUrl ?? "",
         }}
       />
     </div>

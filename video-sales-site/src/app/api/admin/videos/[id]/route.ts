@@ -17,6 +17,7 @@ const videoSchema = z.object({
   videoUrl: z.string().url(),
   gradientFrom: z.string().min(1),
   gradientTo: z.string().min(1),
+  thumbnailUrl: z.string().optional(),
   membersOnly: z.boolean(),
   published: z.boolean(),
 });
