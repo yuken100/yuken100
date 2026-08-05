@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import BookSlotButton from "@/components/BookSlotButton";
+import PendingConfirmationNotice from "@/components/PendingConfirmationNotice";
 
 export type CalendarSlot = {
   id: string;
@@ -168,9 +169,12 @@ export default function LessonCalendar({
                     予約済み
                   </span>
                 ) : slot.myStatus === "PENDING" ? (
-                  <p className="text-xs text-tiffany-800/70">
-                    確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
-                  </p>
+                  <div className="space-y-2">
+                    <PendingConfirmationNotice />
+                    <p className="text-xs text-tiffany-800/70">
+                      確認メールをお送りしています。メール内のリンクをクリックすると予約が完了します。
+                    </p>
+                  </div>
                 ) : slot.full ? (
                   <span className="rounded-full bg-tiffany-50 px-5 py-2 text-sm font-semibold text-tiffany-800/50">
                     満席
