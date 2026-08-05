@@ -7,14 +7,26 @@ export default async function EditTestimonialPage({ params }: { params: { id: st
   const session = await requireAdminSession();
   if (!session) redirect(`/login?callbackUrl=/admin/testimonials/${params.id}/edit`);
 
-  const testimonial = await prisma.testimonial.findUnique({ where: { id: params.id } });
+  const [testimonial, videos, lessons] = await Promise.all([
+    prisma.testimonial.findUnique({ where: { id: params.id } }),
+    prisma.video.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, title: true } }),
+    prisma.lesson.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, title: true } }),
+  ]);
   if (!testimonial) notFound();
+
+  const target = testimonial.videoId
+    ? `video:${testimonial.videoId}`
+    : testimonial.lessonId
+      ? `lesson:${testimonial.lessonId}`
+      : "";
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="font-display text-2xl font-bold text-tiffany-900">口コミを編集</h1>
       <TestimonialForm
         testimonialId={testimonial.id}
+        videos={videos}
+        lessons={lessons}
         initialValues={{
           studentName: testimonial.studentName,
           comment: testimonial.comment,
@@ -22,6 +34,7 @@ export default async function EditTestimonialPage({ params }: { params: { id: st
           photoPosition: testimonial.photoPosition ?? "50% 50%",
           rating: testimonial.rating ? String(testimonial.rating) : "",
           published: testimonial.published,
+          target,
         }}
       />
     </div>

@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import VideoThumb from "@/components/VideoThumb";
 import BookSlotButton from "@/components/BookSlotButton";
 import PendingConfirmationNotice from "@/components/PendingConfirmationNotice";
+import TestimonialSection from "@/components/TestimonialSection";
 
 const formatLabel: Record<string, string> = {
   ONLINE: "オンライン",
@@ -46,6 +47,10 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
   if (!lesson || !lesson.published) notFound();
 
   const isMember = session ? await hasActiveMembership(session.user.id) : false;
+  const testimonials = await prisma.testimonial.findMany({
+    where: { published: true, lessonId: lesson.id },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -159,6 +164,8 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
           </div>
         </div>
       </div>
+
+      <TestimonialSection testimonials={testimonials} title="このレッスンを受けた生徒さんの声" />
     </div>
   );
 }
