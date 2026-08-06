@@ -183,7 +183,9 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
             <div className="rounded-xl2 border border-tiffany-100 bg-white p-6 text-sm text-tiffany-800/70 shadow-sm">
               {myTestimonial.published
                 ? "あなたが投稿したご感想は公開されています。"
-                : "ご感想を送信済みです。確認後に掲載されます。"}
+                : myTestimonial.consentToPublish
+                  ? "ご感想を送信いただきありがとうございます。内容を確認のうえ、サイトに掲載させていただく場合があります。"
+                  : "ご感想を送信いただきありがとうございます。サービス向上の参考として活用させていただきます。"}
             </div>
           ) : (
             <TestimonialSubmitForm lessonId={lesson.id} defaultName={session?.user.name ?? undefined} />
