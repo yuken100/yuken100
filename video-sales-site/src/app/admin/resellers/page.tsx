@@ -26,6 +26,7 @@ export default async function AdminResellersPage() {
       </p>
 
       <div className="mt-8 overflow-hidden rounded-xl2 border border-tiffany-100 bg-white">
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-tiffany-50 text-xs uppercase text-tiffany-700">
             <tr>
@@ -74,6 +75,7 @@ export default async function AdminResellersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
