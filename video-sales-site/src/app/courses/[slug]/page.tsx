@@ -8,7 +8,6 @@ import { getReferringReseller } from "@/lib/referral";
 import VideoThumb from "@/components/VideoThumb";
 import PurchaseButtons from "@/components/PurchaseButtons";
 import TestimonialSection from "@/components/TestimonialSection";
-import TestimonialSubmitForm from "@/components/TestimonialSubmitForm";
 
 export default async function CourseDetailPage({
   params,
@@ -26,13 +25,6 @@ export default async function CourseDetailPage({
     where: { published: true, videoId: video.id },
     orderBy: { createdAt: "desc" },
   });
-  const canReview = Boolean(session) && (isFree || unlocked);
-  const myTestimonial = canReview
-    ? await prisma.testimonial.findFirst({
-        where: { userId: session!.user.id, videoId: video.id },
-      })
-    : null;
-
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
       <Link href="/courses" className="text-sm font-medium text-tiffany-600 hover:text-tiffany-800">
@@ -119,22 +111,6 @@ export default async function CourseDetailPage({
           </div>
         </div>
       </div>
-
-      {canReview && (
-        <div className="mt-10 max-w-2xl">
-          {myTestimonial ? (
-            <div className="rounded-xl2 border border-tiffany-100 bg-white p-6 text-sm text-tiffany-800/70 shadow-sm">
-              {myTestimonial.published
-                ? "あなたが投稿したご感想は公開されています。"
-                : myTestimonial.consentToPublish
-                  ? "ご感想を送信いただきありがとうございます。内容を確認のうえ、サイトに掲載させていただく場合があります。"
-                  : "ご感想を送信いただきありがとうございます。サービス向上の参考として活用させていただきます。"}
-            </div>
-          ) : (
-            <TestimonialSubmitForm videoId={video.id} defaultName={session?.user.name ?? undefined} />
-          )}
-        </div>
-      )}
 
       <TestimonialSection testimonials={testimonials} title="この講座を受けた生徒さんの声" />
     </div>

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { areLessonsEnabled } from "@/lib/plan";
+import { hasActiveMembership } from "@/lib/access";
 import { formatJstDate, formatJstDateTime } from "@/lib/datetime";
 import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
@@ -58,6 +59,51 @@ export default async function DashboardPage() {
     (sum, sale) => sum + (sale.amountJpy - (sale.applicationFeeJpy ?? 0)),
     0
   );
+
+  // Reviewable = purchased (or, with an active membership, any published
+  // video) plus any lesson with a CONFIRMED booking — matching the same
+  // eligibility the /api/testimonials route already enforces server-side.
+  const isMember = await hasActiveMembership(session.user.id);
+  const [allPublishedVideos, myVideoTestimonials, confirmedLessonBookings, myLessonTestimonials] =
+    await Promise.all([
+      isMember ? prisma.video.findMany({ where: { published: true } }) : Promise.resolve([]),
+      prisma.testimonial.findMany({ where: { userId: session.user.id, videoId: { not: null } } }),
+      showLessons
+        ? prisma.lessonBooking.findMany({
+            where: { userId: session.user.id, status: "CONFIRMED" },
+            include: { lessonSlot: { include: { lesson: true } } },
+          })
+        : Promise.resolve([]),
+      prisma.testimonial.findMany({ where: { userId: session.user.id, lessonId: { not: null } } }),
+    ]);
+
+  const eligibleVideos = new Map<string, { id: string; title: string }>();
+  for (const purchase of purchases) eligibleVideos.set(purchase.video.id, purchase.video);
+  for (const video of allPublishedVideos) eligibleVideos.set(video.id, video);
+  const videoTestimonialByVideoId = new Map(myVideoTestimonials.map((t) => [t.videoId as string, t]));
+
+  const eligibleLessons = new Map<string, { id: string; title: string }>();
+  for (const booking of confirmedLessonBookings) {
+    eligibleLessons.set(booking.lessonSlot.lesson.id, booking.lessonSlot.lesson);
+  }
+  const lessonTestimonialByLessonId = new Map(myLessonTestimonials.map((t) => [t.lessonId as string, t]));
+
+  const reviewItems = [
+    ...Array.from(eligibleVideos.values()).map((video) => ({
+      key: `video-${video.id}`,
+      typeLabel: "講座",
+      title: video.title,
+      href: `/dashboard/testimonials/new?videoId=${video.id}`,
+      testimonial: videoTestimonialByVideoId.get(video.id) ?? null,
+    })),
+    ...Array.from(eligibleLessons.values()).map((lesson) => ({
+      key: `lesson-${lesson.id}`,
+      typeLabel: "レッスン",
+      title: lesson.title,
+      href: `/dashboard/testimonials/new?lessonId=${lesson.id}`,
+      testimonial: lessonTestimonialByLessonId.get(lesson.id) ?? null,
+    })),
+  ].sort((a, b) => Number(Boolean(a.testimonial)) - Number(Boolean(b.testimonial)));
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
@@ -207,6 +253,42 @@ export default async function DashboardPage() {
               <VideoCard key={purchase.id} {...purchase.video} />
             ))}
           </div>
+        )}
+      </section>
+
+      <section className="mt-10 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
+        <h2 className="font-display text-lg font-bold text-tiffany-900">ご意見・ご感想</h2>
+        <p className="mt-2 text-sm text-tiffany-800/70">
+          受講した講座・レッスンについて、ご感想をお聞かせください。
+        </p>
+        {reviewItems.length === 0 ? (
+          <p className="mt-4 text-sm text-tiffany-800/60">まだ感想を書ける講座・レッスンはありません。</p>
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {reviewItems.map((item) => (
+              <li
+                key={item.key}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-tiffany-100 p-4"
+              >
+                <div>
+                  <p className="text-xs font-semibold text-tiffany-600">{item.typeLabel}</p>
+                  <p className="text-sm font-semibold text-tiffany-900">{item.title}</p>
+                </div>
+                {item.testimonial ? (
+                  <span className="text-xs text-tiffany-800/60">
+                    {item.testimonial.published ? "ご感想が公開されています" : "ご感想を送信済みです"}
+                  </span>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="rounded-full bg-tiffany-500 px-4 py-2 text-xs font-semibold text-white hover:bg-tiffany-600"
+                  >
+                    感想を書く
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </section>
     </div>
