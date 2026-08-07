@@ -61,8 +61,8 @@ export default async function DashboardPage() {
   );
 
   // Reviewable = purchased (or, with an active membership, any published
-  // video) plus any lesson with a CONFIRMED booking — matching the same
-  // eligibility the /api/testimonials route already enforces server-side.
+  // video) plus any lesson with a CONFIRMED booking whose slot has already
+  // happened — matching the same eligibility /api/testimonials enforces.
   const isMember = await hasActiveMembership(session.user.id);
   const [allPublishedVideos, myVideoTestimonials, confirmedLessonBookings, myLessonTestimonials] =
     await Promise.all([
@@ -70,7 +70,11 @@ export default async function DashboardPage() {
       prisma.testimonial.findMany({ where: { userId: session.user.id, videoId: { not: null } } }),
       showLessons
         ? prisma.lessonBooking.findMany({
-            where: { userId: session.user.id, status: "CONFIRMED" },
+            where: {
+              userId: session.user.id,
+              status: "CONFIRMED",
+              lessonSlot: { startAt: { lt: new Date() } },
+            },
             include: { lessonSlot: { include: { lesson: true } } },
           })
         : Promise.resolve([]),

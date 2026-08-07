@@ -32,7 +32,11 @@ export default async function NewTestimonialPage({
     const lesson = await prisma.lesson.findUnique({ where: { id: lessonId } });
     if (!lesson) notFound();
     const attended = await prisma.lessonBooking.findFirst({
-      where: { userId: session.user.id, status: "CONFIRMED", lessonSlot: { lessonId } },
+      where: {
+        userId: session.user.id,
+        status: "CONFIRMED",
+        lessonSlot: { lessonId, startAt: { lt: new Date() } },
+      },
     });
     if (!attended) notFound();
     const existing = await prisma.testimonial.findFirst({
