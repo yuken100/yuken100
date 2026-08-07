@@ -44,6 +44,15 @@ export default async function WatchPage({ params }: { params: { slug: string } }
 
       <h1 className="mt-4 font-display text-2xl font-bold text-tiffany-900">{video.title}</h1>
 
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-tiffany-600">
+        <span className="rounded-full bg-tiffany-100 px-3 py-1">{video.category}</span>
+        <span className="rounded-full bg-tiffany-100 px-3 py-1">{video.level}</span>
+        <span className="rounded-full bg-tiffany-100 px-3 py-1">{video.durationMinutes}分</span>
+        <span className="rounded-full bg-tiffany-100 px-3 py-1">
+          {isFree ? "無料" : `¥${video.priceJpy.toLocaleString()}`}
+        </span>
+      </div>
+
       <div className="mt-6 overflow-hidden rounded-xl2 bg-black shadow-soft">
         <VideoPlayer videoUrl={video.videoUrl} posterUrl={video.thumbnailUrl} />
       </div>
