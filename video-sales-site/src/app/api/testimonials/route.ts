@@ -3,7 +3,6 @@ import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canWatchVideo } from "@/lib/access";
 
 const schema = z
   .object({
@@ -35,10 +34,12 @@ export async function POST(request: Request) {
   const { videoId, lessonId, studentName, comment, rating, consentToPublish } = parsed.data;
 
   if (videoId) {
-    const eligible = await canWatchVideo(session.user.id, videoId);
-    if (!eligible) {
+    const viewed = await prisma.videoView.findUnique({
+      where: { userId_videoId: { userId: session.user.id, videoId } },
+    });
+    if (!viewed) {
       return NextResponse.json(
-        { error: "この講座を受講した方のみご感想を投稿できます。" },
+        { error: "この講座を視聴した方のみご感想を投稿できます。" },
         { status: 403 }
       );
     }

@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { areLessonsEnabled } from "@/lib/plan";
-import { hasActiveMembership } from "@/lib/access";
 import { formatJstDate, formatJstDateTime } from "@/lib/datetime";
 import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
@@ -60,13 +59,15 @@ export default async function DashboardPage() {
     0
   );
 
-  // Reviewable = purchased (or, with an active membership, any published
-  // video) plus any lesson with a CONFIRMED booking whose slot has already
-  // happened — matching the same eligibility /api/testimonials enforces.
-  const isMember = await hasActiveMembership(session.user.id);
-  const [allPublishedVideos, myVideoTestimonials, confirmedLessonBookings, myLessonTestimonials] =
+  // Reviewable = actually watched (a VideoView record exists) plus any
+  // lesson with a CONFIRMED booking whose slot has already happened —
+  // matching the same eligibility /api/testimonials enforces.
+  const [myVideoViews, myVideoTestimonials, confirmedLessonBookings, myLessonTestimonials] =
     await Promise.all([
-      isMember ? prisma.video.findMany({ where: { published: true } }) : Promise.resolve([]),
+      prisma.videoView.findMany({
+        where: { userId: session.user.id },
+        include: { video: { select: { id: true, title: true } } },
+      }),
       prisma.testimonial.findMany({ where: { userId: session.user.id, videoId: { not: null } } }),
       showLessons
         ? prisma.lessonBooking.findMany({
@@ -82,8 +83,7 @@ export default async function DashboardPage() {
     ]);
 
   const eligibleVideos = new Map<string, { id: string; title: string }>();
-  for (const purchase of purchases) eligibleVideos.set(purchase.video.id, purchase.video);
-  for (const video of allPublishedVideos) eligibleVideos.set(video.id, video);
+  for (const view of myVideoViews) eligibleVideos.set(view.video.id, view.video);
   const videoTestimonialByVideoId = new Map(myVideoTestimonials.map((t) => [t.videoId as string, t]));
 
   const eligibleLessons = new Map<string, { id: string; title: string }>();

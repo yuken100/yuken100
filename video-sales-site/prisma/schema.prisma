@@ -36,6 +36,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   lessonBookings      LessonBooking[]
   testimonials        Testimonial[]
+  videoViews          VideoView[]
 }
 
 model PasswordResetToken {
@@ -68,6 +69,21 @@ model Video {
   createdAt         DateTime      @default(now())
   purchases         Purchase[]
   testimonials      Testimonial[]
+  views             VideoView[]
+}
+
+// Records the first time a user opened a video's watch page — used only to
+// gate the マイページ review prompt on "actually watched" (rather than just
+// purchased/accessible), see /watch/[slug] and the dashboard review list.
+model VideoView {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  videoId  String
+  video    Video    @relation(fields: [videoId], references: [id])
+  viewedAt DateTime @default(now())
+
+  @@unique([userId, videoId])
 }
 
 model Plan {

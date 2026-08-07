@@ -28,6 +28,14 @@ export default async function WatchPage({ params }: { params: { slug: string } }
     if (!unlocked) redirect(`/courses/${video.slug}`);
   }
 
+  if (session) {
+    await prisma.videoView.upsert({
+      where: { userId_videoId: { userId: session.user.id, videoId: video.id } },
+      update: {},
+      create: { userId: session.user.id, videoId: video.id },
+    });
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
       <Link href={`/courses/${video.slug}`} className="text-sm font-medium text-tiffany-600 hover:text-tiffany-800">
