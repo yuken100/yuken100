@@ -5,17 +5,11 @@ import { prisma } from "@/lib/prisma";
 import { formatJstDateTime } from "@/lib/datetime";
 import MarkInquiryRepliedButton from "@/components/MarkInquiryRepliedButton";
 
-function buildGmailComposeUrl(to: string, name: string, message: string): string {
+function buildReplyMailtoUrl(to: string, name: string, message: string): string {
   const subject = "Re: お問い合わせありがとうございます";
   const body = `${name} 様\n\n\n\n--- いただいたお問い合わせ ---\n${message}`;
-  const params = new URLSearchParams({
-    view: "cm",
-    fs: "1",
-    to,
-    su: subject,
-    body,
-  });
-  return `https://mail.google.com/mail/?${params.toString()}`;
+  const params = new URLSearchParams({ subject, body });
+  return `mailto:${to}?${params.toString()}`;
 }
 
 export default async function AdminInquiryDetailPage({ params }: { params: { id: string } }) {
@@ -48,12 +42,10 @@ export default async function AdminInquiryDetailPage({ params }: { params: { id:
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <a
-            href={buildGmailComposeUrl(inquiry.email, inquiry.name, inquiry.message)}
-            target="_blank"
-            rel="noreferrer"
+            href={buildReplyMailtoUrl(inquiry.email, inquiry.name, inquiry.message)}
             className="rounded-full border border-tiffany-300 px-5 py-2.5 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
           >
-            Gmailで返信する
+            メールで返信する
           </a>
           <MarkInquiryRepliedButton inquiryId={inquiry.id} replied={Boolean(inquiry.repliedAt)} />
         </div>
@@ -62,6 +54,9 @@ export default async function AdminInquiryDetailPage({ params }: { params: { id:
           {inquiry.repliedAt
             ? `${formatJstDateTime(inquiry.repliedAt)} に対応済みにしました`
             : "まだ対応済みになっていません"}
+        </p>
+        <p className="mt-1 text-xs text-tiffany-800/50">
+          「メールで返信する」は、宛先・件名・引用文が入力された状態でお使いのメールソフトを開きます。ブラウザでGmailを既定のメールソフトに設定していれば、Gmailの作成画面が開きます。
         </p>
       </div>
     </div>
