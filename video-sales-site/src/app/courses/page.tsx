@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import VideoCard from "@/components/VideoCard";
+import { pickNewIds } from "@/lib/newBadge";
 
 export default async function CoursesPage({
   searchParams,
@@ -14,6 +15,7 @@ export default async function CoursesPage({
     },
     orderBy: { createdAt: "desc" },
   });
+  const newVideoIds = pickNewIds(videos);
 
   const allVideos = await prisma.video.findMany({ select: { category: true } });
   const categories = Array.from(new Set(allVideos.map((v) => v.category)));
@@ -55,7 +57,7 @@ export default async function CoursesPage({
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {videos.map((video) => (
-          <VideoCard key={video.id} {...video} />
+          <VideoCard key={video.id} {...video} isNew={newVideoIds.has(video.id)} />
         ))}
       </div>
     </div>

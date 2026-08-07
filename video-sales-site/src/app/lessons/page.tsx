@@ -3,6 +3,7 @@ import Link from "next/link";
 import { areLessonsEnabled } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import LessonCard from "@/components/LessonCard";
+import { pickNewIds } from "@/lib/newBadge";
 
 export default async function LessonsPage() {
   if (!(await areLessonsEnabled())) notFound();
@@ -11,6 +12,7 @@ export default async function LessonsPage() {
     where: { published: true },
     orderBy: { createdAt: "desc" },
   });
+  const newLessonIds = pickNewIds(lessons);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
@@ -31,7 +33,7 @@ export default async function LessonsPage() {
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {lessons.map((lesson) => (
-          <LessonCard key={lesson.id} {...lesson} />
+          <LessonCard key={lesson.id} {...lesson} isNew={newLessonIds.has(lesson.id)} />
         ))}
       </div>
     </div>
