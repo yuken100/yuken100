@@ -128,6 +128,12 @@ model SiteSettings {
   instructorBio           String?
   instructorPhotoUrl      String?
   instructorPhotoPosition String  @default("50% 50%")
+  // Manual override for the homepage announcement banner. When disabled (the
+  // default), the banner instead auto-shows the newest published video or
+  // lesson — see src/lib/announcement.ts.
+  announcementEnabled     Boolean @default(false)
+  announcementText        String?
+  announcementUrl         String?
 }
 
 // Admin-managed outbound links (blog, Instagram, X, etc.) shown quietly in
