@@ -23,6 +23,7 @@ export default async function Footer() {
                 <li><Link href="/courses" className="hover:text-tiffany-700">講座一覧</Link></li>
                 <li><Link href="/pricing" className="hover:text-tiffany-700">料金プラン</Link></li>
                 <li><Link href="/about" className="hover:text-tiffany-700">スタジオについて</Link></li>
+                <li><Link href="/contact" className="hover:text-tiffany-700">お問い合わせ</Link></li>
               </ul>
             </div>
             <div>

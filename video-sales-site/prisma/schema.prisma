@@ -133,6 +133,18 @@ model Subscription {
   createdAt        DateTime  @default(now())
 }
 
+// A visitor/student-submitted message via the public お問い合わせ form (see
+// /contact and /api/inquiries). Stored so it's visible in /admin/inquiries;
+// a copy is also emailed to every ADMIN-role user and an auto-reply is
+// emailed back to the submitter, quoting their message.
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
+
 // Single-row table for site-wide toggles and content. lessonsEnabled shows
 // or hides the レッスン予約 (lesson booking + calendar) feature without a
 // redeploy — see src/lib/plan.ts. Also carries the homepage instructor
