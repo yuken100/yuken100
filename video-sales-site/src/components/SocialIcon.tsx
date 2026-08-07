@@ -12,7 +12,7 @@ function detectPlatform(url: string): Platform {
   if (host.includes("youtube.com") || host.includes("youtu.be")) return "youtube";
   if (host.includes("tiktok.com")) return "tiktok";
   if (host.includes("facebook.com") || host.includes("fb.com")) return "facebook";
-  if (host.includes("line.me")) return "line";
+  if (host.includes("line.me") || host === "lin.ee" || host.includes("liff.line.me")) return "line";
   return "generic";
 }
 
