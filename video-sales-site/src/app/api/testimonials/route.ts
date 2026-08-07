@@ -53,7 +53,11 @@ export async function POST(request: Request) {
     }
   } else if (lessonId) {
     const attended = await prisma.lessonBooking.findFirst({
-      where: { userId: session.user.id, status: "CONFIRMED", lessonSlot: { lessonId } },
+      where: {
+        userId: session.user.id,
+        status: "CONFIRMED",
+        lessonSlot: { lessonId, startAt: { lt: new Date() } },
+      },
     });
     if (!attended) {
       return NextResponse.json(
