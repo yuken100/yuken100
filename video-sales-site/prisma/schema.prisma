@@ -130,6 +130,15 @@ model SiteSettings {
   instructorPhotoPosition String  @default("50% 50%")
 }
 
+// Admin-managed outbound links (blog, Instagram, X, etc.) shown quietly in
+// the footer. Order shown is createdAt ascending — the order they were added.
+model FooterLink {
+  id        String   @id @default(cuid())
+  label     String
+  url       String
+  createdAt DateTime @default(now())
+}
+
 // Social-proof testimonials — only published ones are shown. A testimonial
 // with neither videoId nor lessonId set appears on the homepage; one linked
 // to a specific video or lesson appears only on that item's detail page
