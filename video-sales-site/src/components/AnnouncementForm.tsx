@@ -77,7 +77,7 @@ export default function AnnouncementForm({ initialValues }: { initialValues: Val
       </div>
 
       <p className="text-xs text-tiffany-800/60">
-        オフのときは、直近に追加された新着の講座・レッスンが自動でお知らせに表示されます。
+        直近に追加された新着の講座・レッスンは自動でお知らせに表示されます。オンにすると、それに加えてこのお知らせも一緒に表示されます。
       </p>
 
       <style jsx>{`

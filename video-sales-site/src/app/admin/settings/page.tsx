@@ -26,7 +26,7 @@ export default async function AdminSettingsPage() {
       <section className="mt-8 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
         <h2 className="font-display text-lg font-bold text-tiffany-900">トップページのお知らせ</h2>
         <p className="mt-2 text-sm text-tiffany-800/70">
-          トップページ上部に表示するお知らせです。新着レッスンなどの案内以外に伝えたいことがあるときにお使いください。
+          トップページ上部に表示するお知らせです。新着の講座・レッスンの案内に加えて表示されるので、それ以外に伝えたいことがあるときにお使いください。
         </p>
         <AnnouncementForm
           initialValues={{
