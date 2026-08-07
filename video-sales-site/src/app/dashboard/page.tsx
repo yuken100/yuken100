@@ -259,16 +259,6 @@ export default async function DashboardPage() {
               >
                 <div>
                   <p className="text-sm font-semibold text-tiffany-900">{purchase.video.title}</p>
-                  <div className="mt-1.5 flex flex-wrap gap-1.5 text-[10px] font-semibold text-tiffany-600">
-                    <span className="rounded-full bg-tiffany-100 px-2.5 py-0.5">{purchase.video.category}</span>
-                    <span className="rounded-full bg-tiffany-100 px-2.5 py-0.5">{purchase.video.level}</span>
-                    <span className="rounded-full bg-tiffany-100 px-2.5 py-0.5">
-                      {purchase.video.durationMinutes}分
-                    </span>
-                    <span className="rounded-full bg-tiffany-100 px-2.5 py-0.5">
-                      {purchase.video.priceJpy === 0 ? "無料" : `¥${purchase.video.priceJpy.toLocaleString()}`}
-                    </span>
-                  </div>
                 </div>
                 <Link
                   href={`/watch/${purchase.video.slug}`}
