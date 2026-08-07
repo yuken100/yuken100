@@ -67,6 +67,14 @@ export default async function HomePage() {
               </Link>
             )}
           </div>
+          {lessonsEnabled && (
+            <Link
+              href="/lessons/calendar"
+              className="text-xs font-medium text-tiffany-700/70 hover:text-tiffany-700"
+            >
+              カレンダーで探す →
+            </Link>
+          )}
         </div>
       </section>
 
