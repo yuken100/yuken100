@@ -54,7 +54,7 @@ export default async function AdminPage() {
             href="/admin/footer-links"
             className="rounded-full border border-tiffany-300 px-5 py-2.5 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
           >
-            フッターリンクを管理
+            SNS管理
           </Link>
           <Link
             href="/admin/videos/new"

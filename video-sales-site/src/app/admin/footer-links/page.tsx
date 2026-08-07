@@ -14,7 +14,7 @@ export default async function AdminFooterLinksPage() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-3xl font-bold text-tiffany-900">フッターリンク管理</h1>
+        <h1 className="font-display text-3xl font-bold text-tiffany-900">SNS管理</h1>
         <Link
           href="/admin/footer-links/new"
           className="rounded-full bg-tiffany-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-tiffany-600"
@@ -23,7 +23,7 @@ export default async function AdminFooterLinksPage() {
         </Link>
       </div>
       <p className="mt-2 text-sm text-tiffany-800/70">
-        ブログやInstagram、Xなど、サイトのフッターに小さく表示するリンクを管理できます。
+        ブログやInstagram、Xなど、サイトの下部に小さく表示するリンクを管理できます。
       </p>
 
       <div className="mt-8 overflow-hidden rounded-xl2 border border-tiffany-100 bg-white">
