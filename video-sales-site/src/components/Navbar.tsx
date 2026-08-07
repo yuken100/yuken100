@@ -16,7 +16,6 @@ export default async function Navbar() {
       : []),
     { href: "/pricing", label: "料金プラン" },
     { href: "/about", label: "スタジオについて" },
-    { href: "/contact", label: "お問い合わせ" },
   ];
 
   return (
