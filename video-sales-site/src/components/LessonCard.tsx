@@ -1,6 +1,5 @@
 import Link from "next/link";
 import VideoThumb from "@/components/VideoThumb";
-import { isNewItem } from "@/lib/newBadge";
 
 const formatLabel: Record<string, string> = {
   ONLINE: "オンライン",
@@ -20,7 +19,7 @@ type LessonCardProps = {
   thumbnailUrl?: string | null;
   thumbnailPosition?: string | null;
   membersOnly?: boolean;
-  createdAt: Date;
+  isNew?: boolean;
 };
 
 export default function LessonCard(lesson: LessonCardProps) {
@@ -35,7 +34,7 @@ export default function LessonCard(lesson: LessonCardProps) {
         level={formatLabel[lesson.format] ?? lesson.format}
         imageUrl={lesson.thumbnailUrl}
         imagePosition={lesson.thumbnailPosition}
-        isNew={isNewItem(lesson.createdAt)}
+        isNew={lesson.isNew}
         className="h-40 w-full"
       />
       <div className="flex flex-1 flex-col gap-2 p-5">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { areLessonsEnabled } from "@/lib/plan";
+import { pickNewIds } from "@/lib/newBadge";
 import VideoCard from "@/components/VideoCard";
 import LessonCard from "@/components/LessonCard";
 import TestimonialSection from "@/components/TestimonialSection";
@@ -30,6 +31,9 @@ export default async function HomePage() {
       take: 6,
     }),
   ]);
+
+  const newVideoIds = pickNewIds(videos);
+  const newLessonIds = pickNewIds(lessons);
 
   return (
     <div>
@@ -80,7 +84,7 @@ export default async function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {videos.map((video) => (
-            <VideoCard key={video.id} {...video} />
+            <VideoCard key={video.id} {...video} isNew={newVideoIds.has(video.id)} />
           ))}
         </div>
       </section>
@@ -102,7 +106,7 @@ export default async function HomePage() {
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {lessons.map((lesson) => (
-              <LessonCard key={lesson.id} {...lesson} />
+              <LessonCard key={lesson.id} {...lesson} isNew={newLessonIds.has(lesson.id)} />
             ))}
           </div>
         </section>

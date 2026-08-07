@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import SocialIcon from "@/components/SocialIcon";
 
 export default async function Footer() {
   const footerLinks = await prisma.footerLink.findMany({ orderBy: { createdAt: "asc" } });
@@ -36,15 +37,16 @@ export default async function Footer() {
         </div>
         <div className="mt-8">
           {footerLinks.length > 0 && (
-            <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-tiffany-800/50">
+            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-tiffany-800/50">
               {footerLinks.map((link) => (
                 <a
                   key={link.id}
                   href={link.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:text-tiffany-700"
+                  className="inline-flex items-center gap-1.5 hover:text-tiffany-700"
                 >
+                  <SocialIcon url={link.url} className="h-5 w-5" />
                   {link.label}
                 </a>
               ))}
