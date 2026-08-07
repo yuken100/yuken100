@@ -1,3 +1,12 @@
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -65,5 +74,72 @@ export async function sendLessonBookingConfirmationEmail(
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Failed to send lesson booking confirmation email: ${res.status} ${text}`);
+  }
+}
+
+export async function sendInquiryNotificationEmail(
+  to: string,
+  name: string,
+  fromEmail: string,
+  message: string
+) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not set");
+  }
+  const from = process.env.EMAIL_FROM ?? "onboarding@resend.dev";
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to,
+      subject: "【新着】お問い合わせが届きました",
+      html: `
+        <p>サイトから新しいお問い合わせが届きました。</p>
+        <p><strong>お名前:</strong> ${escapeHtml(name)}<br><strong>メールアドレス:</strong> ${escapeHtml(fromEmail)}</p>
+        <p><strong>内容:</strong><br>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
+      `,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Failed to send inquiry notification email: ${res.status} ${text}`);
+  }
+}
+
+export async function sendInquiryAutoReplyEmail(to: string, name: string, message: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not set");
+  }
+  const from = process.env.EMAIL_FROM ?? "onboarding@resend.dev";
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to,
+      subject: "お問い合わせを受け付けました",
+      html: `
+        <p>${escapeHtml(name)} 様</p>
+        <p>お問い合わせを受け付けました。内容を確認のうえ、担当者よりご連絡いたします。</p>
+        <p><strong>お送りいただいた内容:</strong><br>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
+      `,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Failed to send inquiry auto-reply email: ${res.status} ${text}`);
   }
 }
