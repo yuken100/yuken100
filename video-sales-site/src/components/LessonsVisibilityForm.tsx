@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { SitePlan } from "@/lib/plan";
 
-export default function PlanSettingForm({ currentPlan }: { currentPlan: SitePlan }) {
+export default function LessonsVisibilityForm({ initialEnabled }: { initialEnabled: boolean }) {
   const router = useRouter();
-  const [plan, setPlan] = useState<SitePlan>(currentPlan);
+  const [enabled, setEnabled] = useState(initialEnabled);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -18,7 +17,7 @@ export default function PlanSettingForm({ currentPlan }: { currentPlan: SitePlan
     await fetch("/api/admin/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ lessonsEnabled: enabled }),
     });
 
     setLoading(false);
@@ -28,14 +27,14 @@ export default function PlanSettingForm({ currentPlan }: { currentPlan: SitePlan
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 flex flex-wrap items-center gap-4">
-      <select
-        value={plan}
-        onChange={(e) => setPlan(e.target.value as SitePlan)}
-        className="rounded-lg border border-tiffany-200 px-4 py-2.5 text-sm focus:border-tiffany-400 focus:outline-none"
-      >
-        <option value="BASIC">ベーシック(動画販売のみ)</option>
-        <option value="PRO">プロ(動画販売 + レッスン予約)</option>
-      </select>
+      <label className="flex items-center gap-2 text-sm text-tiffany-800">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) => setEnabled(e.target.checked)}
+        />
+        レッスン予約・カレンダーを表示する
+      </label>
       <button
         type="submit"
         disabled={loading}

@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getReferringReseller, platformFeeJpy } from "@/lib/referral";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { hasActiveMembership } from "@/lib/access";
 import { formatJstDateTime } from "@/lib/datetime";
 
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     }
 
     if (parsed.data.type === "lesson_slot") {
-      if (!(await isProPlan())) {
+      if (!(await areLessonsEnabled())) {
         return NextResponse.json(
           { error: "レッスン予約機能は現在利用できません。" },
           { status: 403 }

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { hasActiveMembership } from "@/lib/access";
 import { formatJstDateTime } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
@@ -19,7 +19,7 @@ const formatLabel: Record<string, string> = {
 };
 
 export default async function LessonDetailPage({ params }: { params: { slug: string } }) {
-  if (!(await isProPlan())) notFound();
+  if (!(await areLessonsEnabled())) notFound();
 
   const session = await getServerSession(authOptions);
 

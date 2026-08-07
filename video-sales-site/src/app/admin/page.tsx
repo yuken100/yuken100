@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import DeleteVideoButton from "@/components/DeleteVideoButton";
 
 export default async function AdminPage() {
@@ -14,7 +14,7 @@ export default async function AdminPage() {
     prisma.user.count(),
     prisma.subscription.count({ where: { status: "ACTIVE" } }),
     prisma.purchase.findMany({ where: { status: "PAID" } }),
-    isProPlan(),
+    areLessonsEnabled(),
   ]);
 
   const revenue = purchases.reduce((sum, p) => sum + p.amountJpy, 0);

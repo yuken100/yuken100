@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import LessonCard from "@/components/LessonCard";
 
 export default async function LessonsPage() {
-  if (!(await isProPlan())) notFound();
+  if (!(await areLessonsEnabled())) notFound();
 
   const lessons = await prisma.lesson.findMany({
     where: { published: true },

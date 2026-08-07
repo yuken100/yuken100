@@ -1,10 +1,10 @@
 import Link from "next/link";
 import AuthButtons from "@/components/AuthButtons";
 import MobileNav from "@/components/MobileNav";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 
 export default async function Navbar() {
-  const showLessons = await isProPlan();
+  const showLessons = await areLessonsEnabled();
 
   const links = [
     { href: "/courses", label: "講座一覧" },

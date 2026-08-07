@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/require-admin";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { formatJstDateTime } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import AddSlotForm from "@/components/AddSlotForm";
@@ -10,7 +10,7 @@ import CancelSlotButton from "@/components/CancelSlotButton";
 export default async function LessonSlotsPage({ params }: { params: { id: string } }) {
   const session = await requireAdminSession();
   if (!session) redirect(`/login?callbackUrl=/admin/lessons/${params.id}/slots`);
-  if (!(await isProPlan())) notFound();
+  if (!(await areLessonsEnabled())) notFound();
 
   // Includes PENDING (unconfirmed, ¥0-only) bookings alongside CONFIRMED
   // ones so the headcount here matches the capacity actually being held.

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminSession } from "@/lib/require-admin";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 
 const lessonSchema = z.object({
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   if (!session) {
     return NextResponse.json({ error: "管理者権限が必要です。" }, { status: 403 });
   }
-  if (!(await isProPlan())) {
+  if (!(await areLessonsEnabled())) {
     return NextResponse.json({ error: "レッスン予約機能はプロプラン限定です。" }, { status: 403 });
   }
 

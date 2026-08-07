@@ -1,14 +1,14 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/require-admin";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import DeleteLessonButton from "@/components/DeleteLessonButton";
 
 export default async function AdminLessonsPage() {
   const session = await requireAdminSession();
   if (!session) redirect("/login?callbackUrl=/admin/lessons");
-  if (!(await isProPlan())) notFound();
+  if (!(await areLessonsEnabled())) notFound();
 
   const lessons = await prisma.lesson.findMany({
     orderBy: { createdAt: "desc" },
