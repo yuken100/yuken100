@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canWatchVideo } from "@/lib/access";
 import TestimonialSubmitForm from "@/components/TestimonialSubmitForm";
 
 export default async function NewTestimonialPage({
@@ -22,7 +21,10 @@ export default async function NewTestimonialPage({
   if (videoId) {
     const video = await prisma.video.findUnique({ where: { id: videoId } });
     if (!video) notFound();
-    if (!(await canWatchVideo(session.user.id, videoId))) notFound();
+    const viewed = await prisma.videoView.findUnique({
+      where: { userId_videoId: { userId: session.user.id, videoId } },
+    });
+    if (!viewed) notFound();
     const existing = await prisma.testimonial.findFirst({
       where: { userId: session.user.id, videoId },
     });
