@@ -58,12 +58,14 @@ export default async function HomePage() {
             >
               講座を見る
             </Link>
-            <Link
-              href="/pricing"
-              className="rounded-full border border-tiffany-300 bg-white px-8 py-3 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
-            >
-              料金プランを見る
-            </Link>
+            {lessonsEnabled && (
+              <Link
+                href="/lessons"
+                className="rounded-full border border-tiffany-300 bg-white px-8 py-3 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
+              >
+                レッスンを見る
+              </Link>
+            )}
           </div>
         </div>
       </section>
