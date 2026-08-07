@@ -45,7 +45,7 @@ export default async function WatchPage({ params }: { params: { slug: string } }
       <h1 className="mt-4 font-display text-2xl font-bold text-tiffany-900">{video.title}</h1>
 
       <div className="mt-6 overflow-hidden rounded-xl2 bg-black shadow-soft">
-        <VideoPlayer videoUrl={video.videoUrl} />
+        <VideoPlayer videoUrl={video.videoUrl} posterUrl={video.thumbnailUrl} />
       </div>
 
       <p className="mt-6 whitespace-pre-line text-sm leading-relaxed text-tiffany-800/80">

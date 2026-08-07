@@ -1,6 +1,12 @@
 import { resolveVideoEmbed } from "@/lib/videoEmbed";
 
-export default function VideoPlayer({ videoUrl }: { videoUrl: string }) {
+export default function VideoPlayer({
+  videoUrl,
+  posterUrl,
+}: {
+  videoUrl: string;
+  posterUrl?: string | null;
+}) {
   const embed = resolveVideoEmbed(videoUrl);
 
   if (embed.type === "vimeo" || embed.type === "youtube") {
@@ -19,7 +25,7 @@ export default function VideoPlayer({ videoUrl }: { videoUrl: string }) {
 
   return (
     // eslint-disable-next-line jsx-a11y/media-has-caption
-    <video controls className="aspect-video w-full" preload="metadata">
+    <video controls className="aspect-video w-full" preload="metadata" poster={posterUrl ?? undefined}>
       <source src={embed.url} type="video/mp4" />
     </video>
   );
