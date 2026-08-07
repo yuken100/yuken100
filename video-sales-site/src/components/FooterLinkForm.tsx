@@ -2,43 +2,32 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-type FooterLinkFormValues = {
-  label: string;
-  url: string;
-};
+import SocialIcon, { getPlatformLabel } from "@/components/SocialIcon";
 
 export default function FooterLinkForm({
   footerLinkId,
-  initialValues,
+  initialUrl = "",
 }: {
   footerLinkId?: string;
-  initialValues?: Partial<FooterLinkFormValues>;
+  initialUrl?: string;
 }) {
   const router = useRouter();
-  const [values, setValues] = useState<FooterLinkFormValues>({
-    label: initialValues?.label ?? "",
-    url: initialValues?.url ?? "",
-  });
+  const [url, setUrl] = useState(initialUrl);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  function update<K extends keyof FooterLinkFormValues>(key: K, value: FooterLinkFormValues[K]) {
-    setValues((prev) => ({ ...prev, [key]: value }));
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const url = footerLinkId ? `/api/admin/footer-links/${footerLinkId}` : "/api/admin/footer-links";
+    const endpoint = footerLinkId ? `/api/admin/footer-links/${footerLinkId}` : "/api/admin/footer-links";
     const method = footerLinkId ? "PUT" : "POST";
 
-    const res = await fetch(url, {
+    const res = await fetch(endpoint, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      body: JSON.stringify({ url }),
     });
     const data = await res.json().catch(() => ({}));
 
@@ -55,27 +44,26 @@ export default function FooterLinkForm({
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-5">
       <label className="block text-sm font-medium text-tiffany-800">
-        表示名
-        <input
-          required
-          value={values.label}
-          onChange={(e) => update("label", e.target.value)}
-          className="input mt-1"
-          placeholder="例: 公式ブログ、Instagram"
-        />
-      </label>
-
-      <label className="block text-sm font-medium text-tiffany-800">
         リンク先URL
         <input
           required
           type="url"
-          value={values.url}
-          onChange={(e) => update("url", e.target.value)}
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
           className="input mt-1"
           placeholder="https://..."
         />
       </label>
+      <p className="text-xs text-tiffany-800/60">
+        Instagram・X・YouTube・TikTok・Facebook・LINEのURLは自動判定してアイコンを表示します。それ以外はリンクアイコンで表示されます。
+      </p>
+
+      {url && (
+        <div className="flex items-center gap-2 text-sm text-tiffany-800">
+          <SocialIcon url={url} className="h-6 w-6" />
+          {getPlatformLabel(url)}として表示されます
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 

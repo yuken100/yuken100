@@ -131,10 +131,10 @@ model SiteSettings {
 }
 
 // Admin-managed outbound links (blog, Instagram, X, etc.) shown quietly in
-// the footer. Order shown is createdAt ascending — the order they were added.
+// the footer as an icon only — the platform is detected from the URL, see
+// src/components/SocialIcon.tsx. Order shown is createdAt ascending.
 model FooterLink {
   id        String   @id @default(cuid())
-  label     String
   url       String
   createdAt DateTime @default(now())
 }

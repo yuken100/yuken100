@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdminSession } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import DeleteFooterLinkButton from "@/components/DeleteFooterLinkButton";
+import SocialIcon, { getPlatformLabel } from "@/components/SocialIcon";
 
 export default async function AdminFooterLinksPage() {
   const session = await requireAdminSession();
@@ -30,7 +31,7 @@ export default async function AdminFooterLinksPage() {
         <table className="w-full text-left text-sm">
           <thead className="bg-tiffany-50 text-xs uppercase text-tiffany-700">
             <tr>
-              <th className="px-4 py-3">表示名</th>
+              <th className="px-4 py-3">アイコン</th>
               <th className="px-4 py-3">URL</th>
               <th className="px-4 py-3"></th>
             </tr>
@@ -38,7 +39,12 @@ export default async function AdminFooterLinksPage() {
           <tbody>
             {footerLinks.map((link) => (
               <tr key={link.id} className="border-t border-tiffany-50">
-                <td className="px-4 py-3 font-medium text-tiffany-900">{link.label}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2 text-tiffany-900">
+                    <SocialIcon url={link.url} className="h-6 w-6" />
+                    {getPlatformLabel(link.url)}
+                  </div>
+                </td>
                 <td className="max-w-sm truncate px-4 py-3 text-tiffany-800/70">{link.url}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-3">

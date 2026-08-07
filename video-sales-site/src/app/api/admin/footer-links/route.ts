@@ -4,7 +4,6 @@ import { requireAdminSession } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 
 const footerLinkSchema = z.object({
-  label: z.string().min(1),
   url: z.string().url(),
 });
 

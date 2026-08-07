@@ -13,10 +13,7 @@ export default async function EditFooterLinkPage({ params }: { params: { id: str
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
       <h1 className="font-display text-2xl font-bold text-tiffany-900">リンクを編集</h1>
-      <FooterLinkForm
-        footerLinkId={footerLink.id}
-        initialValues={{ label: footerLink.label, url: footerLink.url }}
-      />
+      <FooterLinkForm footerLinkId={footerLink.id} initialUrl={footerLink.url} />
     </div>
   );
 }
