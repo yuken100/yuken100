@@ -10,7 +10,6 @@ import VideoThumb from "@/components/VideoThumb";
 import BookSlotButton from "@/components/BookSlotButton";
 import PendingConfirmationNotice from "@/components/PendingConfirmationNotice";
 import TestimonialSection from "@/components/TestimonialSection";
-import TestimonialSubmitForm from "@/components/TestimonialSubmitForm";
 
 const formatLabel: Record<string, string> = {
   ONLINE: "オンライン",
@@ -52,18 +51,6 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
     where: { published: true, lessonId: lesson.id },
     orderBy: { createdAt: "desc" },
   });
-  const myBookingConfirmed = session
-    ? await prisma.lessonBooking.findFirst({
-        where: { userId: session.user.id, status: "CONFIRMED", lessonSlot: { lessonId: lesson.id } },
-      })
-    : null;
-  const canReview = Boolean(myBookingConfirmed);
-  const myTestimonial = canReview
-    ? await prisma.testimonial.findFirst({
-        where: { userId: session!.user.id, lessonId: lesson.id },
-      })
-    : null;
-
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
       <Link href="/lessons" className="text-sm font-medium text-tiffany-600 hover:text-tiffany-800">
@@ -176,22 +163,6 @@ export default async function LessonDetailPage({ params }: { params: { slug: str
           </div>
         </div>
       </div>
-
-      {canReview && (
-        <div className="mt-10 max-w-2xl">
-          {myTestimonial ? (
-            <div className="rounded-xl2 border border-tiffany-100 bg-white p-6 text-sm text-tiffany-800/70 shadow-sm">
-              {myTestimonial.published
-                ? "あなたが投稿したご感想は公開されています。"
-                : myTestimonial.consentToPublish
-                  ? "ご感想を送信いただきありがとうございます。内容を確認のうえ、サイトに掲載させていただく場合があります。"
-                  : "ご感想を送信いただきありがとうございます。サービス向上の参考として活用させていただきます。"}
-            </div>
-          ) : (
-            <TestimonialSubmitForm lessonId={lesson.id} defaultName={session?.user.name ?? undefined} />
-          )}
-        </div>
-      )}
 
       <TestimonialSection testimonials={testimonials} title="このレッスンを受けた生徒さんの声" />
     </div>
