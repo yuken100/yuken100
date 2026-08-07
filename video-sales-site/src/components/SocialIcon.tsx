@@ -16,6 +16,20 @@ function detectPlatform(url: string): Platform {
   return "generic";
 }
 
+const PLATFORM_LABEL: Record<Platform, string> = {
+  instagram: "Instagram",
+  x: "X",
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  facebook: "Facebook",
+  line: "LINE",
+  generic: "リンク",
+};
+
+export function getPlatformLabel(url: string): string {
+  return PLATFORM_LABEL[detectPlatform(url)];
+}
+
 const BRAND_COLOR: Record<Platform, string> = {
   instagram: "#E1306C",
   x: "#000000",
