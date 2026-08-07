@@ -138,11 +138,16 @@ model Subscription {
 // a copy is also emailed to every ADMIN-role user and an auto-reply is
 // emailed back to the submitter, quoting their message.
 model Inquiry {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
   email     String
   message   String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  // Set automatically the first time an admin opens the detail page.
+  readAt    DateTime?
+  // Set manually via the "対応済みにする" button — there's no way to detect
+  // an actual reply, since it happens over regular email, not in-app.
+  repliedAt DateTime?
 }
 
 // Single-row table for site-wide toggles and content. lessonsEnabled shows
