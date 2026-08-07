@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { formatJstDate, formatJstDateTime } from "@/lib/datetime";
 import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
     prisma.purchase.findMany({
       where: { resellerId: session.user.id, status: "PAID" },
     }),
-    isProPlan(),
+    areLessonsEnabled(),
     // Includes CANCELLED bookings for still-upcoming slots too, so a
     // cancellation stays visible as confirmation instead of just vanishing
     // from the list — it naturally drops off once the slot's time passes.

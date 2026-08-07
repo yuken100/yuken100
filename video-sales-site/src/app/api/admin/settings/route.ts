@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireAdminSession } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 
-const schema = z.object({ plan: z.enum(["BASIC", "PRO"]) });
+const schema = z.object({ lessonsEnabled: z.boolean() });
 
 export async function PUT(request: Request) {
   const session = await requireAdminSession();
@@ -18,8 +18,8 @@ export async function PUT(request: Request) {
 
   await prisma.siteSettings.upsert({
     where: { id: "singleton" },
-    update: { plan: parsed.data.plan },
-    create: { id: "singleton", plan: parsed.data.plan },
+    update: { lessonsEnabled: parsed.data.lessonsEnabled },
+    create: { id: "singleton", lessonsEnabled: parsed.data.lessonsEnabled },
   });
 
   return NextResponse.json({ ok: true });

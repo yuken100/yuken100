@@ -117,14 +117,13 @@ model Subscription {
   createdAt        DateTime  @default(now())
 }
 
-// Single-row table controlling which paid tier of the product this
-// deployment is licensed at ("BASIC" | "PRO"). Lets the same codebase be
-// delivered to different clients with features gated behind a plan, without
-// a redeploy — see src/lib/plan.ts. Also carries the homepage instructor
+// Single-row table for site-wide toggles and content. lessonsEnabled shows
+// or hides the レッスン予約 (lesson booking + calendar) feature without a
+// redeploy — see src/lib/plan.ts. Also carries the homepage instructor
 // profile, shown only once instructorName is set.
 model SiteSettings {
   id                      String  @id @default("singleton")
-  plan                    String  @default("PRO")
+  lessonsEnabled          Boolean @default(true)
   instructorName          String?
   instructorBio           String?
   instructorPhotoUrl      String?

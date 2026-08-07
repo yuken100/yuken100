@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { hasActiveMembership } from "@/lib/access";
 import { formatJstDateTime } from "@/lib/datetime";
 import { sendLessonBookingConfirmationEmail } from "@/lib/email";
@@ -26,7 +26,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
   }
 
-  if (!(await isProPlan())) {
+  if (!(await areLessonsEnabled())) {
     return NextResponse.json({ error: "レッスン予約機能は現在利用できません。" }, { status: 403 });
   }
 

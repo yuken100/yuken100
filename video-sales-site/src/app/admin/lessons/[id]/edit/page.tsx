@@ -1,13 +1,13 @@
 import { redirect, notFound } from "next/navigation";
 import { requireAdminSession } from "@/lib/require-admin";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import LessonForm from "@/components/LessonForm";
 
 export default async function EditLessonPage({ params }: { params: { id: string } }) {
   const session = await requireAdminSession();
   if (!session) redirect(`/login?callbackUrl=/admin/lessons/${params.id}/edit`);
-  if (!(await isProPlan())) notFound();
+  if (!(await areLessonsEnabled())) notFound();
 
   const lesson = await prisma.lesson.findUnique({ where: { id: params.id } });
   if (!lesson) notFound();

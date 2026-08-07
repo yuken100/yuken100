@@ -2,14 +2,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import { hasActiveMembership } from "@/lib/access";
 import { jstDateKey, formatJstTime } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import LessonCalendar from "@/components/LessonCalendar";
 
 export default async function LessonsCalendarPage() {
-  if (!(await isProPlan())) notFound();
+  if (!(await areLessonsEnabled())) notFound();
 
   const session = await getServerSession(authOptions);
   const isMember = session ? await hasActiveMembership(session.user.id) : false;

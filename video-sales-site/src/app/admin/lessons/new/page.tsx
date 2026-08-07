@@ -1,12 +1,12 @@
 import { redirect, notFound } from "next/navigation";
 import { requireAdminSession } from "@/lib/require-admin";
-import { isProPlan } from "@/lib/plan";
+import { areLessonsEnabled } from "@/lib/plan";
 import LessonForm from "@/components/LessonForm";
 
 export default async function NewLessonPage() {
   const session = await requireAdminSession();
   if (!session) redirect("/login?callbackUrl=/admin/lessons/new");
-  if (!(await isProPlan())) notFound();
+  if (!(await areLessonsEnabled())) notFound();
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
