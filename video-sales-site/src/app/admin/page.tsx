@@ -9,13 +9,13 @@ export default async function AdminPage() {
   const session = await requireAdminSession();
   if (!session) redirect("/login?callbackUrl=/admin");
 
-  const [videos, userCount, activeSubs, purchases, showLessons, inquiryCount] = await Promise.all([
+  const [videos, userCount, activeSubs, purchases, showLessons, unreadInquiryCount] = await Promise.all([
     prisma.video.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.user.count(),
     prisma.subscription.count({ where: { status: "ACTIVE" } }),
     prisma.purchase.findMany({ where: { status: "PAID" } }),
     areLessonsEnabled(),
-    prisma.inquiry.count(),
+    prisma.inquiry.count({ where: { readAt: null } }),
   ]);
 
   const revenue = purchases.reduce((sum, p) => sum + p.amountJpy, 0);
@@ -61,7 +61,7 @@ export default async function AdminPage() {
             href="/admin/inquiries"
             className="rounded-full border border-tiffany-300 px-5 py-2.5 text-sm font-semibold text-tiffany-700 hover:bg-tiffany-50"
           >
-            お問い合わせ ({inquiryCount})
+            お問い合わせ{unreadInquiryCount > 0 ? ` (未読${unreadInquiryCount})` : ""}
           </Link>
           <Link
             href="/admin/videos/new"
