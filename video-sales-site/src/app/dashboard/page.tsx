@@ -5,7 +5,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { areLessonsEnabled } from "@/lib/plan";
 import { formatJstDate, formatJstDateTime } from "@/lib/datetime";
-import VideoCard from "@/components/VideoCard";
 import CancelSubscriptionButton from "@/components/CancelSubscriptionButton";
 import CancelBookingButton from "@/components/CancelBookingButton";
 import ResellerPanel from "@/components/ResellerPanel";
@@ -240,7 +239,7 @@ export default async function DashboardPage() {
         />
       )}
 
-      <section className="mt-10">
+      <section className="mt-10 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
         <h2 className="font-display text-lg font-bold text-tiffany-900">
           購入済みの講座 ({purchases.length})
         </h2>
@@ -252,11 +251,25 @@ export default async function DashboardPage() {
             </Link>
           </p>
         ) : (
-          <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-4 space-y-3">
             {purchases.map((purchase) => (
-              <VideoCard key={purchase.id} {...purchase.video} />
+              <li
+                key={purchase.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-tiffany-100 p-4"
+              >
+                <div>
+                  <p className="text-xs font-semibold text-tiffany-600">{purchase.video.category}</p>
+                  <p className="text-sm font-semibold text-tiffany-900">{purchase.video.title}</p>
+                </div>
+                <Link
+                  href={`/watch/${purchase.video.slug}`}
+                  className="rounded-full bg-tiffany-500 px-4 py-2 text-xs font-semibold text-white hover:bg-tiffany-600"
+                >
+                  視聴する
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </section>
 
