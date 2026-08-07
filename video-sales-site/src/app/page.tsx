@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { areLessonsEnabled } from "@/lib/plan";
 import { pickNewIds } from "@/lib/newBadge";
-import { pickAutoAnnouncement } from "@/lib/announcement";
+import { pickAutoAnnouncements } from "@/lib/announcement";
 import VideoCard from "@/components/VideoCard";
 import LessonCard from "@/components/LessonCard";
 import TestimonialSection from "@/components/TestimonialSection";
@@ -37,14 +37,14 @@ export default async function HomePage() {
   const newVideoIds = pickNewIds(videos);
   const newLessonIds = pickNewIds(lessons);
 
-  const announcement =
+  const announcementProps =
     settings?.announcementEnabled && settings.announcementText
-      ? { text: settings.announcementText, href: settings.announcementUrl || null }
-      : pickAutoAnnouncement(videos[0], lessons[0]);
+      ? ({ mode: "manual", text: settings.announcementText, href: settings.announcementUrl || null } as const)
+      : ({ mode: "auto", items: pickAutoAnnouncements(videos, lessons) } as const);
 
   return (
     <div>
-      {announcement && <AnnouncementBanner text={announcement.text} href={announcement.href} />}
+      <AnnouncementBanner {...announcementProps} />
 
       <section className="gradient-hero">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 py-24 text-center">
