@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-export default function Footer() {
+export default async function Footer() {
+  const footerLinks = await prisma.footerLink.findMany({ orderBy: { createdAt: "asc" } });
+
   return (
     <footer className="border-t border-tiffany-100 bg-white">
       <div className="mx-auto max-w-6xl px-6 py-10 text-sm text-tiffany-800/70">
@@ -31,9 +34,26 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <p className="mt-8 text-xs text-tiffany-800/50">
-          &copy; {new Date().getFullYear()} Sara Yoga. All rights reserved.
-        </p>
+        <div className="mt-8">
+          {footerLinks.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-tiffany-800/50">
+              {footerLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-tiffany-700"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-tiffany-800/50">
+            &copy; {new Date().getFullYear()} Sara Yoga. All rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );

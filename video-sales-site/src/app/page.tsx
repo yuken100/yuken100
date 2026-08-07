@@ -1,17 +1,28 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { areLessonsEnabled } from "@/lib/plan";
 import VideoCard from "@/components/VideoCard";
+import LessonCard from "@/components/LessonCard";
 import TestimonialSection from "@/components/TestimonialSection";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [videos, settings, testimonials] = await Promise.all([
+  const lessonsEnabled = await areLessonsEnabled();
+
+  const [videos, lessons, settings, testimonials] = await Promise.all([
     prisma.video.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
       take: 6,
     }),
+    lessonsEnabled
+      ? prisma.lesson.findMany({
+          where: { published: true },
+          orderBy: { createdAt: "desc" },
+          take: 3,
+        })
+      : Promise.resolve([]),
     prisma.siteSettings.findUnique({ where: { id: "singleton" } }),
     prisma.testimonial.findMany({
       where: { published: true, videoId: null, lessonId: null },
@@ -73,6 +84,29 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {lessonsEnabled && lessons.length > 0 && (
+        <section className="mx-auto max-w-6xl px-6 pb-16">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-2xl font-bold text-tiffany-900">
+                新着レッスン
+              </h2>
+              <p className="mt-1 text-sm text-tiffany-800/70">
+                最新の予約可能レッスンをチェックしましょう。
+              </p>
+            </div>
+            <Link href="/lessons" className="text-sm font-semibold text-tiffany-600 hover:text-tiffany-800">
+              すべてのレッスンを見る →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {lessons.map((lesson) => (
+              <LessonCard key={lesson.id} {...lesson} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="bg-tiffany-50">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-16 md:grid-cols-3">

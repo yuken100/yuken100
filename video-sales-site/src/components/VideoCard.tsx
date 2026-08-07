@@ -1,5 +1,6 @@
 import Link from "next/link";
 import VideoThumb from "@/components/VideoThumb";
+import { isNewItem } from "@/lib/newBadge";
 
 type VideoCardProps = {
   slug: string;
@@ -13,6 +14,7 @@ type VideoCardProps = {
   gradientTo: string;
   thumbnailUrl?: string | null;
   thumbnailPosition?: string | null;
+  createdAt: Date;
 };
 
 export default function VideoCard(video: VideoCardProps) {
@@ -27,6 +29,7 @@ export default function VideoCard(video: VideoCardProps) {
         level={video.level}
         imageUrl={video.thumbnailUrl}
         imagePosition={video.thumbnailPosition}
+        isNew={isNewItem(video.createdAt)}
         className="h-40 w-full"
       />
       <div className="flex flex-1 flex-col gap-2 p-5">
