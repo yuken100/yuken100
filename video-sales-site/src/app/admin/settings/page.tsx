@@ -7,6 +7,8 @@ import InstructorProfileForm from "@/components/InstructorProfileForm";
 import AnnouncementForm from "@/components/AnnouncementForm";
 import SiteCopyForm from "@/components/SiteCopyForm";
 import RestoreCopyHistoryButton from "@/components/RestoreCopyHistoryButton";
+import DeleteCopyHistoryButton from "@/components/DeleteCopyHistoryButton";
+import ClearCopyHistoryButton from "@/components/ClearCopyHistoryButton";
 
 function summarizeCopyHistory(entry: {
   heroHeadline: string | null;
@@ -59,7 +61,10 @@ export default async function AdminSettingsPage() {
 
         {copyHistory.length > 0 && (
           <div className="mt-6 border-t border-tiffany-100 pt-4">
-            <h3 className="text-sm font-semibold text-tiffany-800">変更履歴</h3>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-tiffany-800">変更履歴</h3>
+              <ClearCopyHistoryButton />
+            </div>
             <p className="mt-1 text-xs text-tiffany-800/60">
               保存するたびに、その直前の内容がここに記録されます。
             </p>
@@ -75,7 +80,10 @@ export default async function AdminSettingsPage() {
                       {summarizeCopyHistory(entry)}
                     </p>
                   </div>
-                  <RestoreCopyHistoryButton historyId={entry.id} />
+                  <div className="flex items-center gap-3">
+                    <RestoreCopyHistoryButton historyId={entry.id} />
+                    <DeleteCopyHistoryButton historyId={entry.id} />
+                  </div>
                 </li>
               ))}
             </ul>
