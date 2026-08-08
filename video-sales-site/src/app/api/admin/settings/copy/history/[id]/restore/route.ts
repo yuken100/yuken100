@@ -1,26 +1,19 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { requireAdminSession } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 
-const schema = z.object({
-  heroHeadline: z.string(),
-  heroCatchcopy: z.string(),
-  myPageLabel: z.string(),
-  footerIntro: z.string(),
-});
-
-export async function PUT(request: Request) {
+export async function PATCH(_request: Request, { params }: { params: { id: string } }) {
   const session = await requireAdminSession();
   if (!session) {
     return NextResponse.json({ error: "管理者権限が必要です。" }, { status: 403 });
   }
 
-  const parsed = schema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) {
-    return NextResponse.json({ error: "入力内容をご確認ください。" }, { status: 400 });
+  const target = await prisma.siteCopyHistory.findUnique({ where: { id: params.id } });
+  if (!target) {
+    return NextResponse.json({ error: "履歴が見つかりません。" }, { status: 404 });
   }
 
+  // Snapshot the current state too, so restoring is itself undoable.
   const current = await prisma.siteSettings.findUnique({ where: { id: "singleton" } });
   await prisma.siteCopyHistory.create({
     data: {
@@ -31,10 +24,16 @@ export async function PUT(request: Request) {
     },
   });
 
+  const restored = {
+    heroHeadline: target.heroHeadline,
+    heroCatchcopy: target.heroCatchcopy,
+    myPageLabel: target.myPageLabel,
+    footerIntro: target.footerIntro,
+  };
   await prisma.siteSettings.upsert({
     where: { id: "singleton" },
-    update: parsed.data,
-    create: { id: "singleton", ...parsed.data },
+    update: restored,
+    create: { id: "singleton", ...restored },
   });
 
   return NextResponse.json({ ok: true });
