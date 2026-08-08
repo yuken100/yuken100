@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 type Item = { id: string; typeLabel: string; text: string; href: string | null; dismissible: boolean };
 
 const BAR_CLASS =
   "block w-full truncate bg-tiffany-600 px-6 py-2 text-center text-xs font-medium text-white sm:text-sm";
-
-const STORAGE_KEY = "sara-yoga-dismissed-announcements";
 
 function Badge({ children }: { children: string }) {
   return (
@@ -19,35 +18,22 @@ function Badge({ children }: { children: string }) {
 }
 
 export default function AnnouncementBanner({ items }: { items: Item[] }) {
+  const { data: session } = useSession();
   const [visibleItems, setVisibleItems] = useState(items);
   const [open, setOpen] = useState(false);
 
-  // Filters out items this browser already dismissed, once, after mount —
-  // keeps the server-rendered markup (all items) matching on first paint so
-  // there's no hydration mismatch.
-  useEffect(() => {
-    let dismissedIds: string[] = [];
-    try {
-      dismissedIds = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
-    } catch {
-      dismissedIds = [];
-    }
-    if (dismissedIds.length === 0) return;
-    const dismissedSet = new Set(dismissedIds);
-    setVisibleItems((prev) => prev.filter((item) => !item.dismissible || !dismissedSet.has(item.id)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // Only a logged-in visitor can be identified across visits, so only their
+  // clicks get recorded server-side (see /api/announcements/dismiss). For
+  // anyone not logged in this is a no-op — they always see the full list.
   function dismiss(item: Item) {
-    if (!item.dismissible) return;
-    try {
-      const dismissedIds: string[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
-      if (!dismissedIds.includes(item.id)) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...dismissedIds, item.id]));
-      }
-    } catch {
-      // localStorage unavailable — dismissal just won't persist across visits.
-    }
+    if (!item.dismissible || !session) return;
+    fetch("/api/announcements/dismiss", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ itemId: item.id }),
+    }).catch(() => {
+      // Best-effort — worst case the item reappears on the next visit.
+    });
     setVisibleItems((prev) => prev.filter((i) => i.id !== item.id));
   }
 
