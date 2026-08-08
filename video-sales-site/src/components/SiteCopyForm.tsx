@@ -40,7 +40,16 @@ export default function SiteCopyForm({ initialValues }: { initialValues: Values 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
       <label className="block text-sm font-medium text-tiffany-800">
-        トップページの見出し
+        <div className="flex items-center justify-between gap-2">
+          トップページの見出し
+          <button
+            type="button"
+            onClick={() => update("heroHeadline", "")}
+            className="text-xs font-normal text-tiffany-600 hover:text-tiffany-800"
+          >
+            元の文言に戻す
+          </button>
+        </div>
         <textarea
           value={values.heroHeadline}
           onChange={(e) => update("heroHeadline", e.target.value)}
@@ -53,7 +62,16 @@ export default function SiteCopyForm({ initialValues }: { initialValues: Values 
         </span>
       </label>
       <label className="block text-sm font-medium text-tiffany-800">
-        トップページのキャッチコピー
+        <div className="flex items-center justify-between gap-2">
+          トップページのキャッチコピー
+          <button
+            type="button"
+            onClick={() => update("heroCatchcopy", "")}
+            className="text-xs font-normal text-tiffany-600 hover:text-tiffany-800"
+          >
+            元の文言に戻す
+          </button>
+        </div>
         <textarea
           value={values.heroCatchcopy}
           onChange={(e) => update("heroCatchcopy", e.target.value)}
@@ -63,7 +81,16 @@ export default function SiteCopyForm({ initialValues }: { initialValues: Values 
         />
       </label>
       <label className="block text-sm font-medium text-tiffany-800">
-        「マイページ」の表示名
+        <div className="flex items-center justify-between gap-2">
+          「マイページ」の表示名
+          <button
+            type="button"
+            onClick={() => update("myPageLabel", "")}
+            className="text-xs font-normal text-tiffany-600 hover:text-tiffany-800"
+          >
+            元の文言に戻す
+          </button>
+        </div>
         <input
           value={values.myPageLabel}
           onChange={(e) => update("myPageLabel", e.target.value)}
@@ -75,7 +102,16 @@ export default function SiteCopyForm({ initialValues }: { initialValues: Values 
         </span>
       </label>
       <label className="block text-sm font-medium text-tiffany-800">
-        フッターの紹介文
+        <div className="flex items-center justify-between gap-2">
+          フッターの紹介文
+          <button
+            type="button"
+            onClick={() => update("footerIntro", "")}
+            className="text-xs font-normal text-tiffany-600 hover:text-tiffany-800"
+          >
+            元の文言に戻す
+          </button>
+        </div>
         <textarea
           value={values.footerIntro}
           onChange={(e) => update("footerIntro", e.target.value)}
@@ -94,6 +130,9 @@ export default function SiteCopyForm({ initialValues }: { initialValues: Values 
         </button>
         {saved && <span className="text-sm text-tiffany-600">保存しました</span>}
       </div>
+      <p className="text-xs text-tiffany-800/60">
+        「元の文言に戻す」は欄を空にするだけです。反映するには「保存する」を押してください。
+      </p>
 
       <style jsx>{`
         .input {
