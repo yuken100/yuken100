@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type Item = { typeLabel: string; text: string; href: string | null };
+type Item = { id: string; typeLabel: string; text: string; href: string | null; dismissible: boolean };
 
 const BAR_CLASS =
   "block w-full truncate bg-tiffany-600 px-6 py-2 text-center text-xs font-medium text-white sm:text-sm";
+
+const STORAGE_KEY = "sara-yoga-dismissed-announcements";
 
 function Badge({ children }: { children: string }) {
   return (
@@ -17,12 +19,42 @@ function Badge({ children }: { children: string }) {
 }
 
 export default function AnnouncementBanner({ items }: { items: Item[] }) {
+  const [visibleItems, setVisibleItems] = useState(items);
   const [open, setOpen] = useState(false);
 
-  if (items.length === 0) return null;
+  // Filters out items this browser already dismissed, once, after mount —
+  // keeps the server-rendered markup (all items) matching on first paint so
+  // there's no hydration mismatch.
+  useEffect(() => {
+    let dismissedIds: string[] = [];
+    try {
+      dismissedIds = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+    } catch {
+      dismissedIds = [];
+    }
+    if (dismissedIds.length === 0) return;
+    const dismissedSet = new Set(dismissedIds);
+    setVisibleItems((prev) => prev.filter((item) => !item.dismissible || !dismissedSet.has(item.id)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (items.length === 1) {
-    const item = items[0];
+  function dismiss(item: Item) {
+    if (!item.dismissible) return;
+    try {
+      const dismissedIds: string[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+      if (!dismissedIds.includes(item.id)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...dismissedIds, item.id]));
+      }
+    } catch {
+      // localStorage unavailable — dismissal just won't persist across visits.
+    }
+    setVisibleItems((prev) => prev.filter((i) => i.id !== item.id));
+  }
+
+  if (visibleItems.length === 0) return null;
+
+  if (visibleItems.length === 1) {
+    const item = visibleItems[0];
     const content = (
       <span className="inline-flex items-center gap-2">
         <Badge>{item.typeLabel}</Badge>
@@ -30,7 +62,7 @@ export default function AnnouncementBanner({ items }: { items: Item[] }) {
       </span>
     );
     return item.href ? (
-      <Link href={item.href} className={`${BAR_CLASS} hover:bg-tiffany-700`}>
+      <Link href={item.href} onClick={() => dismiss(item)} className={`${BAR_CLASS} hover:bg-tiffany-700`}>
         {content}
       </Link>
     ) : (
@@ -45,13 +77,13 @@ export default function AnnouncementBanner({ items }: { items: Item[] }) {
         onClick={() => setOpen((prev) => !prev)}
         className="flex w-full items-center justify-center gap-2 px-6 py-2 text-xs font-medium sm:text-sm"
       >
-        <Badge>お知らせ</Badge>
-        <span>お知らせ{items.length}件あります</span>
+        <Badge>新着</Badge>
+        <span>新着{visibleItems.length}件</span>
         <span className={`inline-block transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
       </button>
       {open && (
         <ul className="divide-y divide-white/15 border-t border-white/15 bg-tiffany-700/60">
-          {items.map((item) => {
+          {visibleItems.map((item) => {
             const row = (
               <span className="flex items-center justify-between gap-3 px-6 py-2 text-xs sm:text-sm">
                 <span className="truncate">{item.text}</span>
@@ -61,13 +93,18 @@ export default function AnnouncementBanner({ items }: { items: Item[] }) {
               </span>
             );
             return (
-              <li key={`${item.typeLabel}-${item.text}`}>
+              <li key={item.id}>
                 {item.href ? (
-                  <Link href={item.href} className="block hover:bg-tiffany-700">
+                  <Link href={item.href} onClick={() => dismiss(item)} className="block hover:bg-tiffany-700">
                     {row}
                   </Link>
                 ) : (
-                  row
+                  <div
+                    onClick={() => dismiss(item)}
+                    className={item.dismissible ? "cursor-pointer hover:bg-tiffany-700" : ""}
+                  >
+                    {row}
+                  </div>
                 )}
               </li>
             );

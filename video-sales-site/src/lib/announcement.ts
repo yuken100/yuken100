@@ -1,10 +1,16 @@
 import { isWithinNewWindow } from "@/lib/newBadge";
 
 export type AnnouncementItem = {
+  id: string;
   typeLabel: string;
   text: string;
   href: string | null;
   createdAt: Date;
+  // Auto-generated new-course/new-lesson items can be dismissed per-browser
+  // (see AnnouncementBanner) since the item stays visible elsewhere via its
+  // own NEW badge. Manually-written announcements have no such fallback, so
+  // they're only ever removed by the admin turning them off.
+  dismissible: boolean;
 };
 
 const MAX_AUTO_ITEMS = 5;
@@ -20,18 +26,22 @@ function pickAutoAnnouncements(
     ...videos
       .filter((video) => isWithinNewWindow(video.createdAt))
       .map((video) => ({
+        id: `video-${video.slug}`,
         typeLabel: "講座",
         text: video.title,
         href: `/courses/${video.slug}`,
         createdAt: video.createdAt,
+        dismissible: true,
       })),
     ...lessons
       .filter((lesson) => isWithinNewWindow(lesson.createdAt))
       .map((lesson) => ({
+        id: `lesson-${lesson.slug}`,
         typeLabel: "レッスン",
         text: lesson.title,
         href: `/lessons/${lesson.slug}`,
         createdAt: lesson.createdAt,
+        dismissible: true,
       })),
   ];
 
@@ -50,10 +60,12 @@ export function buildAnnouncementItems(
   const items = pickAutoAnnouncements(videos, lessons);
   if (settings?.announcementEnabled && settings.announcementText) {
     items.unshift({
+      id: "manual",
       typeLabel: "お知らせ",
       text: settings.announcementText,
       href: settings.announcementUrl || null,
       createdAt: new Date(),
+      dismissible: false,
     });
   }
   return items;
