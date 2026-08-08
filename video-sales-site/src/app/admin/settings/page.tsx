@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import LessonsVisibilityForm from "@/components/LessonsVisibilityForm";
 import InstructorProfileForm from "@/components/InstructorProfileForm";
 import AnnouncementForm from "@/components/AnnouncementForm";
+import SiteCopyForm from "@/components/SiteCopyForm";
 
 export default async function AdminSettingsPage() {
   const session = await requireAdminSession();
@@ -21,6 +22,21 @@ export default async function AdminSettingsPage() {
           オンにすると、レッスン予約・カレンダーのページとメニューが表示されます。オフにすると、動画講座の販売のみのサイトになります。
         </p>
         <LessonsVisibilityForm initialEnabled={settings?.lessonsEnabled ?? true} />
+      </section>
+
+      <section className="mt-8 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">
+        <h2 className="font-display text-lg font-bold text-tiffany-900">サイトの文言</h2>
+        <p className="mt-2 text-sm text-tiffany-800/70">
+          トップページの見出し・キャッチコピーや、「マイページ」の表示名、フッターの紹介文を編集できます。
+        </p>
+        <SiteCopyForm
+          initialValues={{
+            heroHeadline: settings?.heroHeadline ?? "",
+            heroCatchcopy: settings?.heroCatchcopy ?? "",
+            myPageLabel: settings?.myPageLabel ?? "",
+            footerIntro: settings?.footerIntro ?? "",
+          }}
+        />
       </section>
 
       <section className="mt-8 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">

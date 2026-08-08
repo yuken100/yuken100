@@ -2,9 +2,14 @@ import Link from "next/link";
 import AuthButtons from "@/components/AuthButtons";
 import MobileNav from "@/components/MobileNav";
 import { areLessonsEnabled } from "@/lib/plan";
+import { prisma } from "@/lib/prisma";
 
 export default async function Navbar() {
-  const showLessons = await areLessonsEnabled();
+  const [showLessons, settings] = await Promise.all([
+    areLessonsEnabled(),
+    prisma.siteSettings.findUnique({ where: { id: "singleton" } }),
+  ]);
+  const myPageLabel = settings?.myPageLabel?.trim() || "マイページ";
 
   const links = [
     { href: "/courses", label: "講座一覧" },
@@ -39,7 +44,7 @@ export default async function Navbar() {
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <AuthButtons />
+          <AuthButtons myPageLabel={myPageLabel} />
           <MobileNav links={links} />
         </div>
       </nav>
