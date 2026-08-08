@@ -7,7 +7,6 @@ export default async function Footer() {
     prisma.footerLink.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.siteSettings.findUnique({ where: { id: "singleton" } }),
   ]);
-  const myPageLabel = settings?.myPageLabel?.trim() || "マイページ";
   const footerIntro =
     settings?.footerIntro?.trim() ||
     "ヨガインストラクターのための学びのプラットフォーム。解剖学から指導スキル、専門コースまで、現場で使える講座を毎週お届けしています。";
@@ -35,7 +34,7 @@ export default async function Footer() {
               <ul className="mt-2 space-y-1">
                 <li><Link href="/login" className="hover:text-tiffany-700">ログイン</Link></li>
                 <li><Link href="/signup" className="hover:text-tiffany-700">新規登録</Link></li>
-                <li><Link href="/dashboard" className="hover:text-tiffany-700">{myPageLabel}</Link></li>
+                <li><Link href="/dashboard" className="hover:text-tiffany-700">マイページ</Link></li>
               </ul>
             </div>
           </div>

@@ -167,11 +167,11 @@ model SiteSettings {
   announcementEnabled     Boolean @default(false)
   announcementText        String?
   announcementUrl         String?
-  // Editable homepage/navigation copy — each falls back to the default copy
-  // hardcoded in page.tsx/Footer.tsx/AuthButtons.tsx/dashboard when unset.
+  // Editable homepage/footer copy — each falls back to the default copy
+  // hardcoded in page.tsx/Footer.tsx when unset. マイページ's label is
+  // intentionally not editable — it's always the hardcoded "マイページ".
   heroHeadline            String?
   heroCatchcopy           String?
-  myPageLabel             String?
   footerIntro             String?
 }
 
@@ -184,7 +184,6 @@ model SiteCopyHistory {
   id            String   @id @default(cuid())
   heroHeadline  String?
   heroCatchcopy String?
-  myPageLabel   String?
   footerIntro   String?
   createdAt     DateTime @default(now())
 }

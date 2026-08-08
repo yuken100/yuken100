@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login?callbackUrl=/dashboard");
 
-  const [purchases, subscription, user, resellerSales, showLessons, bookings, settings] = await Promise.all([
+  const [purchases, subscription, user, resellerSales, showLessons, bookings] = await Promise.all([
     prisma.purchase.findMany({
       where: { userId: session.user.id, status: "PAID" },
       include: { video: true },
@@ -42,9 +42,7 @@ export default async function DashboardPage() {
       include: { lessonSlot: { include: { lesson: true } }, confirmation: true },
       orderBy: { lessonSlot: { startAt: "asc" } },
     }),
-    prisma.siteSettings.findUnique({ where: { id: "singleton" } }),
   ]);
-  const myPageLabel = settings?.myPageLabel?.trim() || "マイページ";
 
   // A PENDING booking whose confirmation link expired without being used
   // never got completed — the slot has already freed up automatically
@@ -112,7 +110,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
-      <h1 className="font-display text-3xl font-bold text-tiffany-900">{myPageLabel}</h1>
+      <h1 className="font-display text-3xl font-bold text-tiffany-900">マイページ</h1>
       <p className="mt-2 text-sm text-tiffany-800/70">
         {session.user.name} さん、こんにちは。
       </p>

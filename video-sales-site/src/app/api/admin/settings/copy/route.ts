@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 const schema = z.object({
   heroHeadline: z.string(),
   heroCatchcopy: z.string(),
-  myPageLabel: z.string(),
   footerIntro: z.string(),
 });
 
@@ -26,7 +25,6 @@ export async function PUT(request: Request) {
     data: {
       heroHeadline: current?.heroHeadline,
       heroCatchcopy: current?.heroCatchcopy,
-      myPageLabel: current?.myPageLabel,
       footerIntro: current?.footerIntro,
     },
   });
