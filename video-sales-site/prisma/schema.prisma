@@ -33,10 +33,11 @@ model User {
   businessEmail            String?
   resellerSales            Purchase[] @relation("ResellerSales")
 
-  passwordResetTokens PasswordResetToken[]
-  lessonBookings      LessonBooking[]
-  testimonials        Testimonial[]
-  videoViews          VideoView[]
+  passwordResetTokens     PasswordResetToken[]
+  lessonBookings          LessonBooking[]
+  testimonials            Testimonial[]
+  videoViews              VideoView[]
+  dismissedAnnouncements  DismissedAnnouncement[]
 }
 
 model PasswordResetToken {
@@ -84,6 +85,22 @@ model VideoView {
   viewedAt DateTime @default(now())
 
   @@unique([userId, videoId])
+}
+
+// Tracks which homepage 新着 (new-arrival) banner items a logged-in user has
+// clicked through, so they don't see it again — see AnnouncementBanner and
+// buildAnnouncementItems' `dismissible` flag. Only auto-generated new-course/
+// new-lesson items are dismissible; itemId matches AnnouncementItem.id (e.g.
+// "video-<slug>"). Visitors who aren't logged in have no way to be
+// identified, so they always see the full list instead.
+model DismissedAnnouncement {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  itemId      String
+  dismissedAt DateTime @default(now())
+
+  @@unique([userId, itemId])
 }
 
 model Plan {

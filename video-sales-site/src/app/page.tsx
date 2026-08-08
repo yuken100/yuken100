@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { areLessonsEnabled } from "@/lib/plan";
 import { pickNewIds } from "@/lib/newBadge";
@@ -11,9 +13,9 @@ import AnnouncementBanner from "@/components/AnnouncementBanner";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const lessonsEnabled = await areLessonsEnabled();
+  const [session, lessonsEnabled] = await Promise.all([getServerSession(authOptions), areLessonsEnabled()]);
 
-  const [videos, lessons, settings, testimonials] = await Promise.all([
+  const [videos, lessons, settings, testimonials, dismissed] = await Promise.all([
     prisma.video.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
@@ -32,12 +34,23 @@ export default async function HomePage() {
       orderBy: { createdAt: "desc" },
       take: 6,
     }),
+    // Visitors who aren't logged in can't be identified, so they always see
+    // the full 新着 list — only a logged-in user's own dismissals apply.
+    session
+      ? prisma.dismissedAnnouncement.findMany({
+          where: { userId: session.user.id },
+          select: { itemId: true },
+        })
+      : Promise.resolve([]),
   ]);
 
   const newVideoIds = pickNewIds(videos);
   const newLessonIds = pickNewIds(lessons);
 
-  const announcementItems = buildAnnouncementItems(settings, videos, lessons);
+  const dismissedIds = new Set(dismissed.map((d) => d.itemId));
+  const announcementItems = buildAnnouncementItems(settings, videos, lessons).filter(
+    (item) => !item.dismissible || !dismissedIds.has(item.id)
+  );
   const heroHeadline = settings?.heroHeadline?.trim();
   const heroCatchcopy = settings?.heroCatchcopy?.trim();
 
