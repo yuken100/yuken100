@@ -11,13 +11,11 @@ import RestoreCopyHistoryButton from "@/components/RestoreCopyHistoryButton";
 function summarizeCopyHistory(entry: {
   heroHeadline: string | null;
   heroCatchcopy: string | null;
-  myPageLabel: string | null;
   footerIntro: string | null;
 }): string {
   const parts = [
     entry.heroHeadline && `見出し: ${entry.heroHeadline}`,
     entry.heroCatchcopy && `キャッチコピー: ${entry.heroCatchcopy}`,
-    entry.myPageLabel && `マイページ表示名: ${entry.myPageLabel}`,
     entry.footerIntro && `フッター紹介文: ${entry.footerIntro}`,
   ].filter(Boolean) as string[];
   if (parts.length === 0) return "(すべて初期のデフォルト文言)";
@@ -55,7 +53,6 @@ export default async function AdminSettingsPage() {
           initialValues={{
             heroHeadline: settings?.heroHeadline ?? "",
             heroCatchcopy: settings?.heroCatchcopy ?? "",
-            myPageLabel: settings?.myPageLabel ?? "",
             footerIntro: settings?.footerIntro ?? "",
           }}
         />

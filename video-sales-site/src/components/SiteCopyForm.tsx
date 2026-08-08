@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 type Values = {
   heroHeadline: string;
   heroCatchcopy: string;
-  myPageLabel: string;
   footerIntro: string;
 };
 
@@ -79,27 +78,6 @@ export default function SiteCopyForm({ initialValues }: { initialValues: Values 
           rows={3}
           placeholder="見出しの下に表示される説明文です"
         />
-      </label>
-      <label className="block text-sm font-medium text-tiffany-800">
-        <div className="flex items-center justify-between gap-2">
-          「マイページ」の表示名
-          <button
-            type="button"
-            onClick={() => update("myPageLabel", "")}
-            className="text-xs font-normal text-tiffany-600 hover:text-tiffany-800"
-          >
-            元の文言に戻す
-          </button>
-        </div>
-        <input
-          value={values.myPageLabel}
-          onChange={(e) => update("myPageLabel", e.target.value)}
-          className="input mt-1"
-          placeholder="マイページ"
-        />
-        <span className="mt-1 block text-xs text-tiffany-800/50">
-          ナビゲーション・フッター・マイページ上部の見出しに使われます。
-        </span>
       </label>
       <label className="block text-sm font-medium text-tiffany-800">
         <div className="flex items-center justify-between gap-2">

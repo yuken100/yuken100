@@ -19,7 +19,6 @@ export async function PATCH(_request: Request, { params }: { params: { id: strin
     data: {
       heroHeadline: current?.heroHeadline,
       heroCatchcopy: current?.heroCatchcopy,
-      myPageLabel: current?.myPageLabel,
       footerIntro: current?.footerIntro,
     },
   });
@@ -27,7 +26,6 @@ export async function PATCH(_request: Request, { params }: { params: { id: strin
   const restored = {
     heroHeadline: target.heroHeadline,
     heroCatchcopy: target.heroCatchcopy,
-    myPageLabel: target.myPageLabel,
     footerIntro: target.footerIntro,
   };
   await prisma.siteSettings.upsert({

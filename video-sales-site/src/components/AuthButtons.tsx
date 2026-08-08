@@ -3,7 +3,7 @@
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
-export default function AuthButtons({ myPageLabel = "マイページ" }: { myPageLabel?: string }) {
+export default function AuthButtons() {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
@@ -35,7 +35,7 @@ export default function AuthButtons({ myPageLabel = "マイページ" }: { myPag
         href="/dashboard"
         className="text-sm font-medium text-tiffany-700 hover:text-tiffany-900"
       >
-        {myPageLabel}
+        マイページ
       </Link>
       {session.user.role === "ADMIN" && (
         <Link
