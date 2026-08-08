@@ -1,16 +1,38 @@
 import { redirect } from "next/navigation";
 import { requireAdminSession } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
+import { formatJstDateTime } from "@/lib/datetime";
 import LessonsVisibilityForm from "@/components/LessonsVisibilityForm";
 import InstructorProfileForm from "@/components/InstructorProfileForm";
 import AnnouncementForm from "@/components/AnnouncementForm";
 import SiteCopyForm from "@/components/SiteCopyForm";
+import RestoreCopyHistoryButton from "@/components/RestoreCopyHistoryButton";
+
+function summarizeCopyHistory(entry: {
+  heroHeadline: string | null;
+  heroCatchcopy: string | null;
+  myPageLabel: string | null;
+  footerIntro: string | null;
+}): string {
+  const parts = [
+    entry.heroHeadline && `見出し: ${entry.heroHeadline}`,
+    entry.heroCatchcopy && `キャッチコピー: ${entry.heroCatchcopy}`,
+    entry.myPageLabel && `マイページ表示名: ${entry.myPageLabel}`,
+    entry.footerIntro && `フッター紹介文: ${entry.footerIntro}`,
+  ].filter(Boolean) as string[];
+  if (parts.length === 0) return "(すべて初期のデフォルト文言)";
+  const joined = parts.join(" / ");
+  return joined.length > 60 ? `${joined.slice(0, 60)}…` : joined;
+}
 
 export default async function AdminSettingsPage() {
   const session = await requireAdminSession();
   if (!session) redirect("/login?callbackUrl=/admin/settings");
 
-  const settings = await prisma.siteSettings.findUnique({ where: { id: "singleton" } });
+  const [settings, copyHistory] = await Promise.all([
+    prisma.siteSettings.findUnique({ where: { id: "singleton" } }),
+    prisma.siteCopyHistory.findMany({ orderBy: { createdAt: "desc" } }),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
@@ -37,6 +59,31 @@ export default async function AdminSettingsPage() {
             footerIntro: settings?.footerIntro ?? "",
           }}
         />
+
+        {copyHistory.length > 0 && (
+          <div className="mt-6 border-t border-tiffany-100 pt-4">
+            <h3 className="text-sm font-semibold text-tiffany-800">変更履歴</h3>
+            <p className="mt-1 text-xs text-tiffany-800/60">
+              保存するたびに、その直前の内容がここに記録されます。
+            </p>
+            <ul className="mt-3 space-y-2">
+              {copyHistory.map((entry) => (
+                <li
+                  key={entry.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-tiffany-100 p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs text-tiffany-800/60">{formatJstDateTime(entry.createdAt)}</p>
+                    <p className="mt-0.5 truncate text-xs text-tiffany-800/80">
+                      {summarizeCopyHistory(entry)}
+                    </p>
+                  </div>
+                  <RestoreCopyHistoryButton historyId={entry.id} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       <section className="mt-8 rounded-xl2 border border-tiffany-100 bg-white p-6 shadow-sm">

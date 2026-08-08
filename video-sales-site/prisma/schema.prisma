@@ -175,6 +175,20 @@ model SiteSettings {
   footerIntro             String?
 }
 
+// Snapshot of SiteSettings' four editable copy fields taken right before
+// each overwrite (from PUT /api/admin/settings/copy and the restore route),
+// so a save can be undone from /admin/settings even when the site owner
+// wants to go back further than just the hardcoded default (SiteCopyForm's
+// per-field "元の文言に戻す" already covers that simpler case).
+model SiteCopyHistory {
+  id            String   @id @default(cuid())
+  heroHeadline  String?
+  heroCatchcopy String?
+  myPageLabel   String?
+  footerIntro   String?
+  createdAt     DateTime @default(now())
+}
+
 // Admin-managed outbound links (blog, Instagram, X, etc.) shown quietly in
 // the footer as an icon only — the platform is detected from the URL, see
 // src/components/SocialIcon.tsx. Order shown is createdAt ascending.
