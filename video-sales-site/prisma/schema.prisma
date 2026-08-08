@@ -167,6 +167,12 @@ model SiteSettings {
   announcementEnabled     Boolean @default(false)
   announcementText        String?
   announcementUrl         String?
+  // Editable homepage/navigation copy — each falls back to the default copy
+  // hardcoded in page.tsx/Footer.tsx/AuthButtons.tsx/dashboard when unset.
+  heroHeadline            String?
+  heroCatchcopy           String?
+  myPageLabel             String?
+  footerIntro             String?
 }
 
 // Admin-managed outbound links (blog, Instagram, X, etc.) shown quietly in

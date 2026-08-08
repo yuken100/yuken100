@@ -38,6 +38,8 @@ export default async function HomePage() {
   const newLessonIds = pickNewIds(lessons);
 
   const announcementItems = buildAnnouncementItems(settings, videos, lessons);
+  const heroHeadline = settings?.heroHeadline?.trim();
+  const heroCatchcopy = settings?.heroCatchcopy?.trim();
 
   return (
     <div>
@@ -49,13 +51,19 @@ export default async function HomePage() {
             ヨガインストラクターのための学び場
           </span>
           <h1 className="font-display text-4xl font-bold leading-tight text-tiffany-900 md:text-5xl">
-            現場で活きる指導スキルを、
-            <br className="hidden md:block" />
-            自分のペースで学ぶ。
+            {heroHeadline ? (
+              <span className="whitespace-pre-line">{heroHeadline}</span>
+            ) : (
+              <>
+                現場で活きる指導スキルを、
+                <br className="hidden md:block" />
+                自分のペースで学ぶ。
+              </>
+            )}
           </h1>
-          <p className="max-w-2xl text-base text-tiffany-800/80 md:text-lg">
-            解剖学の基礎から専門コース、指導ビジネスの視点まで。10本以上の講座を配信中、
-            毎週新しい動画を追加しています。単品購入でも、見放題の会員プランでも。
+          <p className="max-w-2xl whitespace-pre-line text-base text-tiffany-800/80 md:text-lg">
+            {heroCatchcopy ||
+              "解剖学の基礎から専門コース、指導ビジネスの視点まで。10本以上の講座を配信中、毎週新しい動画を追加しています。単品購入でも、見放題の会員プランでも。"}
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link

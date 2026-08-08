@@ -3,7 +3,14 @@ import { prisma } from "@/lib/prisma";
 import SocialIcon, { getPlatformLabel } from "@/components/SocialIcon";
 
 export default async function Footer() {
-  const footerLinks = await prisma.footerLink.findMany({ orderBy: { createdAt: "asc" } });
+  const [footerLinks, settings] = await Promise.all([
+    prisma.footerLink.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.siteSettings.findUnique({ where: { id: "singleton" } }),
+  ]);
+  const myPageLabel = settings?.myPageLabel?.trim() || "マイページ";
+  const footerIntro =
+    settings?.footerIntro?.trim() ||
+    "ヨガインストラクターのための学びのプラットフォーム。解剖学から指導スキル、専門コースまで、現場で使える講座を毎週お届けしています。";
 
   return (
     <footer className="border-t border-tiffany-100 bg-white">
@@ -11,10 +18,7 @@ export default async function Footer() {
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="font-display text-lg font-bold text-tiffany-700">Sara Yoga</p>
-            <p className="mt-2 max-w-sm">
-              ヨガインストラクターのための学びのプラットフォーム。解剖学から指導スキル、
-              専門コースまで、現場で使える講座を毎週お届けしています。
-            </p>
+            <p className="mt-2 max-w-sm whitespace-pre-line">{footerIntro}</p>
           </div>
           <div className="flex gap-10">
             <div>
@@ -31,7 +35,7 @@ export default async function Footer() {
               <ul className="mt-2 space-y-1">
                 <li><Link href="/login" className="hover:text-tiffany-700">ログイン</Link></li>
                 <li><Link href="/signup" className="hover:text-tiffany-700">新規登録</Link></li>
-                <li><Link href="/dashboard" className="hover:text-tiffany-700">マイページ</Link></li>
+                <li><Link href="/dashboard" className="hover:text-tiffany-700">{myPageLabel}</Link></li>
               </ul>
             </div>
           </div>
